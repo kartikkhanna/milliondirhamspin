@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>The Million Dirham Spin | Performance Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--burgundy:#45011A;--burgundy-2:#5C0A27;--gold:#A68048;--blush:#D8A7B1;--blush-2:#F6E9EC;--rose:#C4808E;
+  --bg:#FAFAF9;--panel:#FFFFFF;--line:#E6E2E0;--fg:#1B1B1B;--muted:#77706E;--soft:#F3F1F0;--chip:#ECE9E7;--green:#1F8A5B;--red:#C2273D}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:Outfit,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;font-size:15px}
+.num{font-variant-numeric:tabular-nums}
+.in{max-width:1120px;margin:0 auto;padding:0 28px}
+
+/* header band */
+.hero{background:radial-gradient(520px 260px at 100% 30%,rgba(216,167,177,.16),transparent 70%),var(--burgundy);color:#fff;padding:34px 0 22px}
+.top{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.brand{font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;color:var(--blush)}
+.refresh{text-align:right;font-size:12.5px;color:rgba(255,255,255,.6);line-height:1.7;white-space:nowrap}
+.refresh b{display:block;color:#fff;font-weight:600;font-size:13.5px}
+h1{font-size:54px;line-height:1.05;font-weight:300;margin:16px 0 26px;letter-spacing:.005em;text-transform:uppercase}
+.tabs{display:flex;gap:8px;flex-wrap:wrap}
+.tabs button{all:unset;cursor:pointer;font:500 14.5px Outfit,sans-serif;color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:8px 18px;transition:background .15s,border-color .15s}
+.tabs button:hover{border-color:rgba(255,255,255,.6)}
+.tabs button[aria-pressed="true"]{background:var(--blush);border-color:var(--blush);color:var(--burgundy);font-weight:600}
+.tabs button:focus-visible,.seg button:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+
+/* filter row */
+.bar{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:20}
+.bar .in>div{display:flex;gap:10px 14px;flex-wrap:wrap;align-items:center;padding:14px 0}
+.fg{display:flex;align-items:center;gap:10px;min-width:0}
+.fg label{font-size:13px;color:var(--muted)}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow-x:auto}
+.seg button{all:unset;cursor:pointer;font:400 14px Outfit,sans-serif;color:var(--muted);padding:6px 13px;border-radius:999px;white-space:nowrap}
+.seg button:hover{color:var(--fg)}
+.seg button[aria-pressed="true"]{background:var(--chip);color:var(--fg);font-weight:500}
+
+main{padding:34px 0 60px;display:flex;flex-direction:column;gap:20px}
+.sec-t{display:flex;align-items:center;gap:14px;margin:10px 0 0;flex-wrap:wrap}
+.sec-t:not(:first-child){margin-top:26px}
+.sec-t span{font-size:11.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--rose);border:1.5px solid var(--blush);border-radius:999px;padding:4px 13px;font-weight:500;white-space:nowrap}
+.sec-t h2{font-size:26px;font-weight:400;margin:0;letter-spacing:-.005em}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 1px 2px rgba(0,0,0,.03),0 6px 16px rgba(0,0,0,.04);padding:20px 22px;min-width:0}
+.card h3{font-size:15px;font-weight:500;margin:0}
+.card .cap{font-size:13px;color:var(--muted);margin:3px 0 18px;line-height:1.5}
+.head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}
+.lead{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:end}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.g21{display:grid;grid-template-columns:minmax(0,1.9fr) minmax(0,1fr);gap:14px}
+.g12{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.45fr);gap:14px}
+.g11{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:860px){.g21,.g12,.g11,.g3,.lead{grid-template-columns:minmax(0,1fr)}h1{font-size:38px}}
+@media (max-width:560px){h1{font-size:30px}.in{padding:0 16px}.card{padding:16px}.refresh{display:none}.sec-t h2{font-size:22px}}
+
+/* kpi */
+.kpi-l{font-size:13.5px;font-weight:500;margin:0 0 10px}
+.kpi-v{font-size:36px;font-weight:400;line-height:1.05;letter-spacing:-.015em}
+.kpi.big .kpi-v{font-size:52px}
+.kpi.big{padding:26px 26px 22px}
+.kpi-v small{font-size:14px;font-weight:400;color:var(--muted);margin-left:5px;letter-spacing:0}
+.kpi-n{font-size:13px;color:var(--muted);margin:10px 0 0;line-height:1.5;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.kpi-d{font-size:13px;color:var(--muted);margin:8px 0 0}
+.delta{display:inline-flex;align-items:center;gap:4px;font-weight:500;border-radius:7px;padding:2px 8px;font-size:13px;background:var(--chip);color:#5F5957}
+.delta.down{background:#FBE6EA;color:var(--red)}.delta.up{background:#E4F2EA;color:var(--green)}
+.spark{display:block;width:100%;height:34px;margin-top:12px}
+.split{display:flex;height:8px;border-radius:99px;overflow:hidden;background:var(--soft)}
+.split i{display:block;height:100%}
+
+/* charts */
+.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;color:var(--muted)}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:6px}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;overflow:visible}
+.chart text{font-size:12px;fill:var(--muted);font-family:inherit}
+.chart .val{fill:var(--fg);font-weight:500}
+.tip{position:absolute;pointer-events:none;background:#1B1B1B;color:#fff;border-radius:10px;padding:8px 11px;font-size:12.5px;line-height:1.5;white-space:nowrap;z-index:5;box-shadow:0 8px 20px rgba(0,0,0,.18)}
+.tip b{font-weight:600}
+.donut{display:flex;align-items:center;gap:18px;flex-wrap:wrap;justify-content:center}
+.donut svg{width:170px;height:170px;flex:none}
+.dl{display:flex;flex-direction:column;gap:12px;min-width:150px;flex:1}
+.dl div{display:flex;justify-content:space-between;gap:10px;align-items:baseline;font-size:14px}
+.dl span i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:8px}
+.dl b{font-weight:500;font-size:18px}
+.dl small{color:var(--muted);margin-left:6px;font-size:13px}
+
+/* location cards */
+.loc{display:flex;flex-direction:column;gap:16px}
+.loc-h{display:flex;justify-content:space-between;align-items:center;gap:10px}
+.loc-h h3{display:flex;align-items:center;gap:8px}
+.loc-h h3 i{width:10px;height:10px;border-radius:3px;display:inline-block}
+.rank{font-size:11px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:#5F5957;background:var(--chip);border-radius:7px;padding:3px 9px;white-space:nowrap}
+.big{font-size:40px;font-weight:400;letter-spacing:-.015em;line-height:1}
+.big small{font-size:13.5px;color:var(--muted);font-weight:400;margin-left:8px;letter-spacing:0}
+.meter-l{display:flex;justify-content:space-between;font-size:13px;color:var(--muted);margin-bottom:7px;gap:8px}
+.meter-l b{color:var(--fg);font-weight:500}
+.meter{height:10px;border-radius:6px;background:var(--soft);overflow:hidden}
+.meter i{display:block;height:100%;border-radius:6px;background:var(--burgundy)}
+.mini{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;border-top:1px solid var(--line);padding-top:14px}
+.mini div{font-size:12.5px;color:var(--muted)}
+.mini b{display:block;font-size:18px;color:var(--fg);font-weight:400;margin-bottom:2px}
+
+/* funnel-style rows / tables */
+.rows{display:flex;flex-direction:column;gap:12px}
+.frow{display:grid;grid-template-columns:minmax(120px,210px) minmax(0,1fr) 92px;gap:14px;align-items:center}
+.frow .n{font-size:14.5px}.frow .n small{display:block;color:var(--muted);font-size:12.5px;margin-top:1px}
+.frow .track{background:var(--soft);border-radius:7px;height:30px;overflow:hidden}
+.frow .stack{display:flex;height:100%;border-radius:7px;overflow:hidden;min-width:3px}
+.frow .stack i{display:block;height:100%}
+.frow .v{font-size:14px;color:var(--muted);white-space:nowrap}.frow .v b{color:var(--fg);font-weight:500;margin-right:6px}
+@media (max-width:560px){.frow{grid-template-columns:minmax(0,1fr) 80px}.frow .track{grid-column:1/-1;order:3;height:18px}}
+.scroll{overflow:auto;max-height:460px;margin:0 -6px}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{position:sticky;top:0;background:var(--panel);text-align:right;font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:500;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{text-align:right;padding:11px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th:first-child,td:first-child{text-align:left;white-space:normal;min-width:150px}
+tbody tr:hover td{background:var(--bg)}
+td .tag{display:inline-block;font-size:10.5px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;border-radius:6px;padding:2px 7px;margin-left:8px;vertical-align:middle;background:var(--chip);color:#5F5957}
+td .ib{display:inline-block;height:6px;border-radius:99px;background:var(--blush);vertical-align:middle;margin-right:8px}
+tr.total td{font-weight:500;border-bottom:0;background:var(--bg)}
+
+/* cost */
+.target{position:relative;height:14px;border-radius:7px;background:var(--soft);margin:36px 0 34px}
+.target i{position:absolute;inset:0 auto 0 0;border-radius:7px}
+.target .mx{background:var(--blush)}.target .ex{background:var(--burgundy)}
+.target span{position:absolute;top:-25px;transform:translateX(-50%);font-size:12px;color:var(--muted);white-space:nowrap}
+.target span.b{top:21px}
+.tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tile{border:1px solid var(--line);border-radius:10px;padding:14px 16px}
+.tile p{margin:0;font-size:13px;font-weight:500}
+.tile b{display:block;font-size:26px;font-weight:400;margin:6px 0 2px;letter-spacing:-.01em}
+.tile small{font-size:12.5px;color:var(--muted)}
+.msg{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:44px;text-align:center;color:var(--muted)}
+footer{color:var(--muted);font-size:13px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
+</style>
+</head>
+<body>
+<div class="hero"><div class="in">
+  <div class="top">
+    <div class="brand">Emirates NBD SHARE Visa Credit Card</div>
+    <div class="refresh">Last data refresh<b id="pill-t">Loading</b></div>
+  </div>
+  <h1>The Million Dirham Spin</h1>
+  <div class="tabs" id="tabs"></div>
+</div></div>
+
+<div class="bar"><div class="in"><div>
+  <div class="fg"><div class="seg" id="f-per"></div></div>
+  <div class="fg"><label>Location</label><div class="seg" id="f-loc"></div></div>
+  <div class="fg"><label>Audience</label><div class="seg" id="f-aud"></div></div>
+</div></div></div>
+
+<div class="in"><main id="app"><div class="msg">Loading activation data</div></main>
+<footer id="foot"></footer><div style="height:40px"></div></div>
+
+<script>
+/* ───────── Fixed reference figures, from the business case workbook ───────── */
+var LOCS=[
+  {code:'MOE',name:'Mall of the Emirates',short:'MOE',color:'#45011A',planPerDay:122,planTotal:2623,firstFullDay:'2026-11-18'},
+  {code:'MCC',name:'City Centre Mirdif',short:'Mirdif',color:'#A68048',planPerDay:122,planTotal:2623,firstFullDay:'2026-11-18'},
+  {code:'DCC',name:'City Centre Deira',short:'Deira',color:'#D8A7B1',planPerDay:280,planTotal:9072,firstFullDay:'2026-11-17'}
+];
+var PRIZE_VALUE={'Carrefour AED 50 voucher':50,'Carrefour AED 100 voucher':100,'Carrefour AED 150 voucher':150,'Carrefour AED 250 voucher':250,
+  '1,000 SHARE Points':100,'1,500 SHARE Points':150,'2,500 SHARE Points':250,'10,000 SHARE Points':1000,'20,000 SHARE Points':2000,
+  'Anker Soundcore speaker':80,'JBL Soundgear Clips':400,'Dyson V8 Absolute':800,'Samsung 65-inch mini LED 4K Smart TV':2000,
+  '24K gold bar - 5g':2500,'24K gold bar - 10g':5000,'HP Pavilion 15 AI Laptop':3000,'Samsung Z Flip8 256GB':4699,'Samsung Galaxy Z Fold8 Ultra 256GB':7999};
+var BUDGET=[['Booth production, promoters, OOH and radio',1259000,0,1259000],['Carrefour rental and retail media',400000,400000,0],['Deira 6x3m mall rental',225000,112500,112500],['Influencers',110300,110300,0],['WhatsApp',70500,70500,0],['Paid media',54985,54985,0],['Assets and collateral production',21180,21180,0]];
+var REWARDS_TARGET=500000,APPROVE_EXPECTED=0.10,APPROVE_MAX=0.20;
+var CATS=[['Bonus Millionaire tickets','#45011A'],['Carrefour vouchers','#A68048'],['SHARE Points','#D8A7B1'],['Big-ticket prizes','#1E0A10']];
+var CH_COL='#45011A',NCH_COL='#D8A7B1';
+
+/* ───────── helpers ───────── */
+var f0=function(n){return Math.round(n).toLocaleString('en-US');};
+var fk=function(n){return n>=1e6?(Math.round(n/1e4)/100)+'M':n>=1e4?Math.round(n/1e3)+'K':f0(n);};
+var pct=function(a,b){return b?Math.round(100*a/b):0;};
+var MON=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+var dShort=function(s){var p=s.split('-');return (+p[2])+' '+MON[+p[1]-1];};
+var dDow=function(s){var p=s.split('-');return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][new Date(Date.UTC(+p[0],+p[1]-1,+p[2])).getUTCDay()];};
+var sum=function(a,fn){var t=0;for(var i=0;i<a.length;i++)t+=fn(a[i]);return t;};
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var h=function(html){var t=document.createElement('template');t.innerHTML=html.trim();return t.content.firstChild;};
+var NS='http://www.w3.org/2000/svg';
+var S=function(tag,a,text){var e=document.createElementNS(NS,tag);for(var k in (a||{}))e.setAttribute(k,a[k]);if(text!=null)e.textContent=text;return e;};
+function catOf(p){if(p.indexOf('Millionaire')>=0)return 0;if(/voucher/i.test(p))return 1;if(p.indexOf('SHARE Points')>=0)return 2;return 3;}
+function enrich(r){var v=/AED ([\d,]+) voucher/.exec(r.p),s=/^([\d,]+) SHARE Points/.exec(r.p),t=/^\+(\d+) bonus/.exec(r.p);
+  return {date:r.d,ch:r.c===1,loc:r.l,prize:r.p,cat:catOf(r.p),voucher:v?+v[1].replace(/,/g,''):0,points:s?+s[1].replace(/,/g,''):0,tickets:t?+t[1]:0,value:PRIZE_VALUE[r.p]||0};}
+function tot(rows){var ch=0,v=0,p=0,t=0;rows.forEach(function(r){if(r.ch)ch++;v+=r.voucher;p+=r.points;t+=r.tickets;});return {spins:rows.length,ch:ch,nch:rows.length-ch,voucher:v,points:p,tickets:t};}
+function tipFor(box){var t=h('<div class="tip" hidden></div>');box.appendChild(t);return {show:function(ev,html){t.innerHTML=html;t.hidden=false;var b=box.getBoundingClientRect();t.style.left=Math.min(Math.max(ev.clientX-b.left+12,0),Math.max(b.width-t.offsetWidth-4,0))+'px';t.style.top=Math.max(ev.clientY-b.top-t.offsetHeight-10,0)+'px';},hide:function(){t.hidden=true;}};}
+
+/* ───────── state ───────── */
+var ALL=[],META={},F={tab:'pulse',loc:'ALL',aud:'ALL',per:'ALL'};
+function seg(id,key,opts){var box=document.getElementById(id);box.replaceChildren();opts.forEach(function(o){var b=h('<button type="button" aria-pressed="'+(F[key]===o[0])+'">'+esc(o[1])+'</button>');b.onclick=function(){F[key]=o[0];filters();render();};box.appendChild(b);});}
+function filters(){
+  var tb=document.getElementById('tabs');tb.replaceChildren();[['pulse','Pulse'],['locations','Locations'],['prizes','Prizes'],['cost','Cost']].forEach(function(o){var b=h('<button type="button" aria-pressed="'+(F.tab===o[0])+'">'+o[1]+'</button>');b.onclick=function(){F.tab=o[0];filters();render();window.scrollTo({top:0});};tb.appendChild(b);});
+  seg('f-loc','loc',[['ALL','All']].concat(LOCS.map(function(l){return [l.code,l.short];})));
+  seg('f-aud','aud',[['ALL','All'],['CH','Cardholders'],['NCH','Non-cardholders']]);
+  seg('f-per','per',[['ALL','All time'],['7','Last 7 days'],['1','Latest day']]);
+}
+function view(){
+  var days=Array.from(new Set(ALL.map(function(r){return r.date;}))).sort(),keep=F.per==='ALL'?days:days.slice(-(+F.per));
+  var set=new Set(keep);
+  return ALL.filter(function(r){return (F.loc==='ALL'||r.loc===F.loc)&&(F.aud==='ALL'||(F.aud==='CH')===r.ch)&&set.has(r.date);});
+}
+
+/* ───────── charts ───────── */
+function spark(vals,color){var w=120,hh=30,mx=Math.max.apply(null,vals.concat([1])),n=vals.length;if(n<2)return '';
+  var pts=vals.map(function(v,i){return [i*(w/(n-1)),hh-3-(hh-8)*v/mx];});
+  var line=pts.map(function(p,i){return (i?'L':'M')+p[0].toFixed(1)+' '+p[1].toFixed(1);}).join(' ');
+  return '<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none" aria-hidden="true"><path d="'+line+' L'+w+' '+hh+' L0 '+hh+'Z" fill="'+color+'" opacity=".1"/><path d="'+line+'" fill="none" stroke="'+color+'" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/></svg>';}
+function drawDaily(box,rows){
+  box.replaceChildren();
+  var days=Array.from(new Set(rows.map(function(r){return r.date;}))).sort();if(!days.length)return;
+  var locs=LOCS.filter(function(l){return F.loc==='ALL'||l.code===F.loc;});
+  var W=Math.max(box.clientWidth||700,280),H=280,m={t:26,r:6,b:44,l:34};
+  var data=days.map(function(d){var o={d:d,t:0,parts:[]};locs.forEach(function(l){var n=0;rows.forEach(function(r){if(r.date===d&&r.loc===l.code)n++;});o.parts.push([l,n]);o.t+=n;});return o;});
+  var max=Math.max.apply(null,data.map(function(o){return o.t;}).concat([1])),step=Math.pow(10,Math.floor(Math.log10(max)));var tick=max/step>5?step*2:max/step>2?step:step/2;tick=Math.max(tick,1);var top=Math.ceil(max/tick)*tick;
+  var y=function(v){return H-m.b-(H-m.b-m.t)*v/top;};
+  var s=S('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Spins per day, stacked by location'}),tip=tipFor(box);
+  for(var v=0;v<=top;v+=tick){s.appendChild(S('line',{x1:m.l,x2:W-m.r,y1:y(v),y2:y(v),stroke:v?'#F0E9E6':'#D9CBC7','stroke-dasharray':v?'3 4':''}));s.appendChild(S('text',{x:m.l-8,y:y(v)+4,'text-anchor':'end'},f0(v)));}
+  var band=(W-m.l-m.r)/data.length,bw=Math.min(band*0.62,64),every=Math.ceil(data.length/Math.max(1,Math.floor((W-m.l)/58)));
+  data.forEach(function(o,i){
+    var x=m.l+i*band+(band-bw)/2,acc=0,g=S('g',{});
+    o.parts.forEach(function(p,j){if(!p[1])return;var y1=y(acc+p[1]),hh=y(acc)-y1;acc+=p[1];
+      g.appendChild(S('rect',{x:x,y:y1+(j<o.parts.length-1&&acc<o.t?1:0),width:bw,height:Math.max(hh-1,1),rx:Math.min(5,bw/4),fill:p[0].color}));});
+    var hit=S('rect',{x:m.l+i*band,y:m.t,width:band,height:H-m.b-m.t,fill:'transparent'});
+    hit.addEventListener('pointermove',function(ev){tip.show(ev,'<b>'+dDow(o.d)+' '+dShort(o.d)+'</b>: '+f0(o.t)+' spins<br>'+o.parts.map(function(p){return esc(p[0].name)+': '+f0(p[1]);}).join('<br>'));});
+    hit.addEventListener('pointerleave',tip.hide);
+    s.appendChild(g);
+    if(band>26)s.appendChild(S('text',{class:'val',x:x+bw/2,y:y(o.t)-7,'text-anchor':'middle'},f0(o.t)));
+    if(i%every===0){s.appendChild(S('text',{x:x+bw/2,y:H-24,'text-anchor':'middle'},dShort(o.d)));var dw=S('text',{x:x+bw/2,y:H-9,'text-anchor':'middle'},dDow(o.d));dw.style.opacity=.7;s.appendChild(dw);}
+    s.appendChild(hit);
+  });
+  box.appendChild(s);
+}
+function donut(a,b){var r=62,c=2*Math.PI*r,t=a+b||1,la=c*a/t;
+  return '<svg viewBox="0 0 170 170" role="img" aria-label="Cardholder split"><g transform="rotate(-90 85 85)"><circle cx="85" cy="85" r="'+r+'" fill="none" stroke="'+NCH_COL+'" stroke-width="22"/><circle cx="85" cy="85" r="'+r+'" fill="none" stroke="'+CH_COL+'" stroke-width="22" stroke-dasharray="'+la.toFixed(2)+' '+(c-la).toFixed(2)+'"/></g><text x="85" y="82" text-anchor="middle" style="font:600 28px Outfit,sans-serif;fill:#1E0A10">'+pct(a,t)+'%</text><text x="85" y="102" text-anchor="middle" style="font:500 11px Outfit,sans-serif;fill:#7D6A6F">hold the card</text></svg>';}
+
+/* ───────── render ───────── */
+function render(){
+  var rows=view(),T=tot(rows),app=document.getElementById('app');
+  var allDays=Array.from(new Set(ALL.map(function(r){return r.date;}))).sort(),last=allDays[allDays.length-1];
+  if(!rows.length){app.replaceChildren(h('<div class="msg">No plays match these filters.</div>'));return;}
+  var sec=function(tag,title){return '<div class="sec-t"><span>'+tag+'</span><h2>'+title+'</h2></div>';};
+  var days=Array.from(new Set(rows.map(function(r){return r.date;}))).sort();
+  var perDay=function(fn){return days.map(function(d){return sum(rows.filter(function(r){return r.date===d;}),fn);});};
+  var chip=function(vals){var n=vals.length;if(n<2)return '<span class="delta">'+dShort(days[0])+' only</span>';var d=vals[n-1]-vals[n-2],p=vals[n-2]?Math.round(100*d/vals[n-2]):0;
+    return '<span class="delta '+(d>0?'up':d<0?'down':'')+'">'+(d>0?'▲ +':d<0?'▼ −':'')+Math.abs(p)+'%</span> '+dShort(days[n-1])+' vs '+dShort(days[n-2]);};
+  var K=function(cls,l,v,unit,vals,note,color){return '<div class="card kpi '+cls+'"><p class="kpi-l">'+l+'</p><div class="kpi-v num">'+v+(unit?'<small>'+unit+'</small>':'')+'</div><p class="kpi-n">'+chip(vals)+'</p><p class="kpi-d">'+note+'</p>'+spark(vals,color||'#45011A')+'</div>';};
+  var shown=LOCS.filter(function(l){return F.loc==='ALL'||l.code===F.loc;});
+  var html='';
+
+  if(F.tab==='pulse'){
+    html+=sec('Activation','Footfall &amp; spins')+'<section class="lead">'+
+      K('big','Spins',f0(T.spins),'',perDay(function(){return 1;}),'every spin wins a prize, since '+dShort(allDays[0]))+
+      K('','Cardholders',f0(T.ch),'',perDay(function(r){return r.ch?1:0;}),pct(T.ch,T.spins)+'% of spins, already hold the card')+
+      K('','Non-cardholders',f0(T.nch),'',perDay(function(r){return r.ch?0:1;}),'leads to convert by 31 Dec','#C4808E')+'</section>';
+    html+=sec('Rewards','What has been won')+'<section class="g3">'+
+      K('','Carrefour vouchers',f0(T.voucher),'AED',perDay(function(r){return r.voucher;}),'voucher value won','#A68048')+
+      K('','SHARE Points',fk(T.points),'pts',perDay(function(r){return r.points;}),'worth AED '+f0(T.points/10),'#A68048')+
+      K('','Bonus tickets',f0(T.tickets),'',perDay(function(r){return r.tickets;}),'Millionaire draw tickets','#77706E')+'</section>';
+    html+=sec('Trend','Spins by day')+'<section class="g21"><div class="card"><div class="head"><div><h3>Daily spins</h3><p class="cap">Stacked by location</p></div><div class="legend">'+shown.map(function(l){return '<span><i style="background:'+l.color+'"></i>'+esc(l.name)+'</span>';}).join('')+'</div></div><div class="chart" id="c-daily"></div></div>'+
+      '<div class="card"><h3>Who is playing</h3><p class="cap">Cardholders against new leads</p><div class="donut">'+donut(T.ch,T.nch)+'<div class="dl"><div><span><i style="background:'+CH_COL+'"></i>Cardholders</span><span><b class="num">'+f0(T.ch)+'</b><small>'+pct(T.ch,T.spins)+'%</small></span></div><div><span><i style="background:'+NCH_COL+'"></i>Non-cardholders</span><span><b class="num">'+f0(T.nch)+'</b><small>'+pct(T.nch,T.spins)+'%</small></span></div></div></div></div></section>';
+  }
+
+  if(F.tab==='locations'){
+    var per=shown.map(function(l){var g=rows.filter(function(r){return r.loc===l.code;});var gf=g.filter(function(r){return r.date>=l.firstFullDay;});var dd=new Set(gf.map(function(r){return r.date;})).size;return {l:l,t:tot(g),avg:dd?Math.round(gf.length/dd):0};});
+    var ranked=per.slice().sort(function(a,b){return b.t.spins-a.t.spins;});
+    html+=sec('Booths','How each mall is doing')+'<section class="'+(per.length>1?'g3':'g11')+'">'+per.map(function(x){var pp=pct(x.avg,x.l.planPerDay);
+      return '<div class="card loc"><div class="loc-h"><h3><i style="background:'+x.l.color+'"></i>'+esc(x.l.name)+'</h3>'+(per.length>1&&ranked[0]===x&&x.t.spins?'<span class="rank">Busiest</span>':'')+'</div>'+
+        '<div class="big num">'+f0(x.t.spins)+'<small>spins · '+pct(x.t.spins,T.spins)+'% of total</small></div>'+
+        '<div><div class="meter-l"><span>Average per day vs plan</span><span><b class="num">'+f0(x.avg)+'</b> / '+f0(x.l.planPerDay)+' · '+pp+'%</span></div><div class="meter"><i style="width:'+Math.min(pp,100)+'%"></i></div></div>'+
+        '<div><div class="meter-l"><span>Cardholders <b class="num">'+f0(x.t.ch)+'</b></span><span>Non-cardholders <b class="num">'+f0(x.t.nch)+'</b></span></div><div class="split"><i style="width:'+pct(x.t.ch,x.t.spins)+'%;background:'+CH_COL+'"></i><i style="flex:1;background:'+NCH_COL+'"></i></div></div>'+
+        '<div class="mini"><div><b class="num">'+f0(x.t.voucher)+'</b>Vouchers, AED</div><div><b class="num">'+fk(x.t.points)+'</b>SHARE Points</div><div><b class="num">'+f0(x.t.tickets)+'</b>Bonus tickets</div></div></div>';}).join('')+'</section>';
+    html+=sec('Detail','Side by side')+'<div class="card"><div class="scroll"><table><thead><tr><th>Location</th><th>Spins</th><th>Cardholders</th><th>Non-cardholders</th><th>Vouchers (AED)</th><th>SHARE Points</th><th>Bonus tickets</th><th>Avg / day</th><th>Plan / day</th></tr></thead><tbody>'+
+      per.map(function(x){return '<tr><td>'+esc(x.l.name)+'</td><td class="num">'+f0(x.t.spins)+'</td><td class="num">'+f0(x.t.ch)+'</td><td class="num">'+f0(x.t.nch)+'</td><td class="num">'+f0(x.t.voucher)+'</td><td class="num">'+f0(x.t.points)+'</td><td class="num">'+f0(x.t.tickets)+'</td><td class="num">'+f0(x.avg)+'</td><td class="num">'+f0(x.l.planPerDay)+'</td></tr>';}).join('')+
+      (per.length>1?'<tr class="total"><td>Total</td><td class="num">'+f0(T.spins)+'</td><td class="num">'+f0(T.ch)+'</td><td class="num">'+f0(T.nch)+'</td><td class="num">'+f0(T.voucher)+'</td><td class="num">'+f0(T.points)+'</td><td class="num">'+f0(T.tickets)+'</td><td></td><td></td></tr>':'')+'</tbody></table></div></div>';
+  }
+
+  if(F.tab==='prizes'){
+    var cats=CATS.map(function(c,i){var g=rows.filter(function(r){return r.cat===i;});var ch=g.filter(function(r){return r.ch;}).length;return {n:c[0],won:g.length,ch:ch,nch:g.length-ch};});
+    var cmax=Math.max.apply(null,cats.map(function(c){return c.won;}).concat([1]));
+    var by={};rows.forEach(function(r){var o=by[r.prize]||(by[r.prize]={won:0,ch:0,cat:r.cat,val:r.value});o.won++;if(r.ch)o.ch++;});
+    var pr=Object.keys(by).map(function(p){return [p,by[p]];}).sort(function(a,b){return b[1].won-a[1].won||(a[0]<b[0]?-1:1);}),pmax=pr.length?pr[0][1].won:1;
+    html+=sec('Prize mix','What people are winning')+'<div class="card"><div class="head"><div><h3>Prizes by type</h3><p class="cap">Spins landing on each prize type</p></div><div class="legend"><span><i style="background:'+CH_COL+'"></i>Cardholders</span><span><i style="background:'+NCH_COL+'"></i>Non-cardholders</span></div></div><div class="rows">'+
+      cats.map(function(c){return '<div class="frow"><div class="n">'+c.n+'<small>'+f0(c.ch)+' cardholders · '+f0(c.nch)+' non-cardholders</small></div><div class="track"><div class="stack" style="width:'+(100*c.won/cmax)+'%"><i style="width:'+pct(c.ch,c.won)+'%;background:'+CH_COL+'"></i><i style="flex:1;background:'+NCH_COL+'"></i></div></div><div class="v num"><b>'+f0(c.won)+'</b>'+pct(c.won,T.spins)+'%</div></div>';}).join('')+'</div></div>';
+    html+=sec('Breakdown','Every prize won')+'<div class="card"><div class="scroll"><table><thead><tr><th>Prize</th><th>Won</th><th>Cardholders</th><th>Non-cardholders</th><th>Value each</th></tr></thead><tbody>'+
+      pr.map(function(x){var o=x[1];return '<tr><td>'+esc(x[0])+(o.cat===3?'<span class="tag">Big ticket</span>':'')+'</td><td class="num"><span class="ib" style="width:'+Math.max(4,70*o.won/pmax)+'px"></span>'+f0(o.won)+'</td><td class="num">'+f0(o.ch)+'</td><td class="num">'+f0(o.won-o.ch)+'</td><td class="num">'+(o.val?'AED '+f0(o.val):'–')+'</td></tr>';}).join('')+'</tbody></table></div></div>';
+  }
+
+  if(F.tab==='cost'){
+    var chV=sum(rows,function(r){return r.ch?r.value:0;}),nV=sum(rows,function(r){return r.ch?0:r.value;}),ex=Math.round(chV+nV*APPROVE_EXPECTED),mx=Math.round(chV+nV*APPROVE_MAX);
+    var planT=sum(shown,function(l){return l.planTotal;}),bT=sum(BUDGET,function(b){return b[1];}),bS=sum(BUDGET,function(b){return b[2];}),bE=sum(BUDGET,function(b){return b[3];});
+    var scale=Math.max(REWARDS_TARGET*0.05,mx*1.6),pe=100*ex/scale,pm=100*mx/scale;
+    html+=sec('Rewards cost','Tracking against the business case')+'<section class="g11"><div class="card kpi big"><p class="kpi-l">Expected rewards cost</p><div class="kpi-v num">'+f0(ex)+'<small>AED</small></div><p class="kpi-n"><span class="delta">'+(Math.round(1000*ex/REWARDS_TARGET)/10)+'%</span> of the AED '+f0(REWARDS_TARGET)+' rewards target</p>'+
+      '<div class="target"><i class="mx" style="width:'+pm+'%"></i><i class="ex" style="width:'+pe+'%"></i><span style="left:'+pe+'%">Expected '+f0(ex)+'</span><span class="b" style="left:'+pm+'%">Maximum '+f0(mx)+'</span></div>'+
+      '<p class="kpi-d" style="line-height:1.55">Prizes valued at business case prices. Non-cardholder prizes are only paid once the card is approved and activated. Bonus tickets carry no cost here.</p></div>'+
+      '<div class="tiles"><div class="tile"><p>Cardholder prizes</p><b class="num">'+f0(chV)+'</b><small>AED, counted in full</small></div><div class="tile"><p>Non-cardholder prizes</p><b class="num">'+f0(nV)+'</b><small>AED face value, pending approval</small></div><div class="tile"><p>Maximum rewards cost</p><b class="num">'+f0(mx)+'</b><small>AED, at the 40% approval cap</small></div><div class="tile"><p>Spins vs plan</p><b class="num">'+(Math.round(1000*T.spins/planT)/10)+'%</b><small>of '+f0(planT)+' planned plays</small></div></div></section>';
+    html+=sec('Budget','Location and marketing')+'<div class="card"><div class="head"><div><h3>AED '+f0(bT)+' committed</h3><p class="cap">From the business case. Actual spend is not tracked here yet.</p></div><div class="legend"><span><i style="background:'+CH_COL+'"></i>SHARE '+f0(bS)+'</span><span><i style="background:#A68048"></i>Emirates NBD '+f0(bE)+'</span></div></div><div class="rows">'+
+      BUDGET.map(function(b){return '<div class="frow"><div class="n">'+esc(b[0])+'</div><div class="track"><div class="stack" style="width:'+(100*b[1]/BUDGET[0][1])+'%"><i style="width:'+(100*b[2]/b[1])+'%;background:'+CH_COL+'"></i><i style="flex:1;background:#A68048"></i></div></div><div class="v num"><b>'+f0(b[1])+'</b></div></div>';}).join('')+'</div></div>';
+  }
+
+  app.replaceChildren(h('<div style="display:flex;flex-direction:column;gap:20px">'+html+'</div>'));
+  var box=document.getElementById('c-daily');if(box)drawDaily(box,rows);
+  window.onresize=function(){clearTimeout(window.__rz);window.__rz=setTimeout(function(){var b=document.getElementById('c-daily');if(b)drawDaily(b,view());},150);};
+
+  var unv=Array.from(new Set(ALL.filter(function(r){return r.cat!==0&&!r.value;}).map(function(r){return r.prize;})));
+  var foot='One row per play as reported by Emirates NBD. The sheet has no player IDs or time of day, so each play counts as one person.';
+  if(unv.length)foot+=' Not yet valued in the cost section: '+unv.join(', ')+'.';
+  if(META.skipped&&META.skipped.length)foot+=' '+META.skipped.length+' sheet row(s) left out because the date, location or prize is missing.';
+  document.getElementById('foot').textContent=foot;
+}
+function stamp(){var u=new Date(META.updated);document.getElementById('pill-t').textContent=u.toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Dubai'})+', '+u.toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Dubai'});}
+function load(){
+  fetch('data.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){META=d;ALL=d.rows.map(enrich);stamp();filters();render();}).catch(function(){
+    if(ALL.length)return;document.getElementById('pill-t').textContent='Not loaded';
+    document.getElementById('app').replaceChildren(h('<div class="msg">The activation data could not be loaded. Please refresh in a minute.</div>'));});
+}
+load();setInterval(load,10*60*1000);
+</script>
+</body>
+</html>
