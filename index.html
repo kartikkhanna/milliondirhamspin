@@ -160,6 +160,7 @@ tr.total td{font-weight:500;border-bottom:0;background:var(--bg)}
 .rep .tot{font-weight:600;border-left:1px solid var(--line)}
 .rep .na{color:#C9C4C2}
 .rep tbody tr:hover td{background:var(--bg)}
+.dl-btn{all:unset;cursor:pointer;margin-left:auto;background:var(--burgundy);color:#fff;border-radius:999px;padding:9px 18px;font:500 14px Outfit,sans-serif}.dl-btn:hover{background:var(--burgundy-2)}
 .trk{font-size:13.5px}.trk td{padding:8px 0;white-space:normal}.trk td:first-child{min-width:0;color:var(--muted);font-weight:400}.trk tr:last-child td{border-bottom:0}
 .calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px}
 @media (max-width:860px){.calc{grid-template-columns:minmax(0,1fr)}}
@@ -258,17 +259,76 @@ function track(){
     o.costNow+=chV+nV*a*c;o.costEnd+=fch*chAvg+fn*a*c*nAvg;o.costDue+=rt*el;});
   return o;
 }
+function trackCards(){
+  var t=track(),C=TARGET.cards,cT=C.total,draw=TARGET.rewards.draw,rT=t.costTarget+draw,rEnd=t.costEnd+draw;
+  return [
+    {title:'New cards',cap:'Estimated: '+R.apply+'% of non-cardholders apply, '+R.conv+'% of those are approved',big:f0(t.cardsEnd),unit:'on-ground cards by the end',
+     chip:pct(t.cardsEnd,t.cardsTarget)+'%',chipCls:t.cardsEnd>=t.cardsTarget?'up':'down',chipText:'of the '+f0(t.cardsTarget)+' on-ground target at the current pace',
+     bar:{now:t.cardsNow,end:t.cardsEnd,target:cT,mark:t.cardsTarget,markL:'On ground'},
+     rows:[['Target for the activation period',f0(cT)],['On ground',f0(t.cardsTarget),1],['Other marketing channels promoting the activation',f0(C.organic),1],['Planned on ground by '+dShort(t.last),f0(t.cardsDue)],['Estimated on ground so far',f0(t.cardsNow)],['Current pace',f1(t.paceNow)+' a day vs '+f1(t.pacePlan)+' planned'],['Forecast on ground by the end',f0(t.cardsEnd)]],
+     foot:f0(C.grand)+' cards in total: '+f0(t.cardsTarget)+' on ground, '+f0(C.organic)+' from other marketing channels promoting the activation and '+f0(C.digital)+' from the digital wheel. Only on-ground plays are in this sheet.'},
+    {title:'Rewards cost',cap:'Expected cost in AED: cardholder prizes in full, non-cardholder prizes once approved, plus the grand prize',big:f0(rEnd),unit:'AED by the end',
+     chip:pct(rEnd,rT)+'%',chipCls:'',chipText:'of the AED '+f0(rT)+' expected at the current pace',
+     bar:{now:t.costNow,end:rEnd,target:rT},
+     rows:[['Rewards expected','AED '+f0(rT)],['On-ground prizes','AED '+f0(t.costTarget),1],['Grand prize','AED '+f0(draw),1],['Planned prizes by '+dShort(t.last),'AED '+f0(t.costDue)],['Expected prizes so far','AED '+f0(t.costNow)],['Forecast prizes by the end','AED '+f0(t.costEnd)],['Forecast with the grand prize','AED '+f0(rEnd)]],
+     foot:'The digital wheel is budgeted separately, capped at AED '+f0(TARGET.rewards.digitalCap)+' for its '+f0(C.digital)+' cards, and is not included here.'}];
+}
 function trackHtml(){
   if(!TARGET||!ALL.length)return '';
-  var t=track(),cT=TARGET.cards.total,draw=TARGET.rewards.draw,rT=t.costTarget+draw,rEnd=t.costEnd+draw;
-  var bar=function(now,end,target,mark,markL){var m=Math.max(target,end)||1;return '<div class="target" style="margin:30px 0 '+(mark?'30':'26')+'px"><i class="mx" style="width:'+Math.min(100*end/m,100)+'%"></i><i class="ex" style="width:'+Math.min(100*now/m,100)+'%"></i><span style="left:'+Math.min(100*target/m,100)+'%;transform:translateX(-100%)">Target '+f0(target)+'</span>'+(mark?'<span class="b" style="left:'+(100*mark/m)+'%">'+markL+' '+f0(mark)+'</span><b style="position:absolute;left:'+(100*mark/m)+'%;top:-3px;bottom:-3px;width:2px;background:var(--gold)"></b>':'')+'</div>';};
-  var row=function(l,v,sub){return '<tr><td'+(sub?' style="padding-left:16px"':'')+'>'+l+'</td><td class="num">'+v+'</td></tr>';};
-  return '<section class="g11">'+
-    '<div class="card"><h3>New cards</h3><p class="cap">Estimated: '+R.apply+'% of non-cardholders apply, '+R.conv+'% of those are approved</p><div class="kpi-v num" style="font-size:44px">'+f0(t.cardsEnd)+'<small>on-ground cards by the end</small></div><p class="kpi-n"><span class="delta '+(t.cardsEnd>=t.cardsTarget?'up':'down')+'">'+pct(t.cardsEnd,t.cardsTarget)+'%</span> of the '+f0(t.cardsTarget)+' on-ground target at the current pace</p>'+bar(t.cardsNow,t.cardsEnd,cT,t.cardsTarget,'On ground')+
-      '<table class="trk"><tbody>'+row('Target for the activation period',f0(cT))+row('On ground',f0(t.cardsTarget),1)+row('Other channels during the activation',f0(TARGET.cards.organic),1)+row('Planned on ground by '+dShort(t.last),f0(t.cardsDue))+row('Estimated on ground so far',f0(t.cardsNow))+row('Current pace',f1(t.paceNow)+' a day vs '+f1(t.pacePlan)+' planned')+row('Forecast on ground by the end',f0(t.cardsEnd))+'</tbody></table>'+
-      '<p class="kpi-d" style="line-height:1.5;margin-top:12px">Cards coming through other channels during the activation are not in this sheet yet.</p></div>'+
-    '<div class="card"><h3>Rewards cost</h3><p class="cap">Expected cost in AED: cardholder prizes in full, non-cardholder prizes once approved, plus the grand prize</p><div class="kpi-v num" style="font-size:44px">'+f0(rEnd)+'<small>AED by the end</small></div><p class="kpi-n"><span class="delta">'+pct(rEnd,rT)+'%</span> of the AED '+f0(rT)+' expected at the current pace</p>'+bar(t.costNow,rEnd,rT)+
-      '<table class="trk"><tbody>'+row('Rewards expected','AED '+f0(rT))+row('On-ground prizes','AED '+f0(t.costTarget),1)+row('Grand prize','AED '+f0(draw),1)+row('Planned prizes by '+dShort(t.last),'AED '+f0(t.costDue))+row('Expected prizes so far','AED '+f0(t.costNow))+row('Forecast prizes by the end','AED '+f0(t.costEnd))+row('Forecast with the grand prize','AED '+f0(rEnd))+'</tbody></table></div></section>';
+  return '<section class="g11">'+trackCards().map(function(c){var b=c.bar,m=Math.max(b.target,b.end)||1;
+    return '<div class="card"><h3>'+c.title+'</h3><p class="cap">'+c.cap+'</p><div class="kpi-v num" style="font-size:44px">'+c.big+'<small>'+c.unit+'</small></div><p class="kpi-n"><span class="delta '+c.chipCls+'">'+c.chip+'</span> '+c.chipText+'</p>'+
+      '<div class="target" style="margin:30px 0 '+(b.mark?'30':'26')+'px"><i class="mx" style="width:'+Math.min(100*b.end/m,100)+'%"></i><i class="ex" style="width:'+Math.min(100*b.now/m,100)+'%"></i><span style="left:'+Math.min(100*b.target/m,100)+'%;transform:translateX(-100%)">Target '+f0(b.target)+'</span>'+(b.mark?'<span class="b" style="left:'+(100*b.mark/m)+'%">'+b.markL+' '+f0(b.mark)+'</span><b style="position:absolute;left:'+(100*b.mark/m)+'%;top:-3px;bottom:-3px;width:2px;background:var(--gold)"></b>':'')+'</div>'+
+      '<table class="trk"><tbody>'+c.rows.map(function(r){return '<tr><td'+(r[2]?' style="padding-left:16px"':'')+'>'+r[0]+'</td><td class="num">'+r[1]+'</td></tr>';}).join('')+'</tbody></table><p class="kpi-d" style="line-height:1.5;margin-top:12px">'+c.foot+'</p></div>';}).join('')+'</section>';
+}
+
+/* ───────── snapshot image (drawn on a canvas so it downloads as a PNG in any browser) ───────── */
+function snapPNG(){
+  var W=1200,P=48,FONT='Outfit,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif',cv=document.createElement('canvas'),x=cv.getContext('2d');
+  var days=Array.from(new Set(ALL.map(function(r){return r.date;}))).sort(),last=days[days.length-1],show=days.slice(-8),cards=trackCards();
+  var T=function(t,px,py,size,weight,color,align){x.font=(weight||400)+' '+size+'px '+FONT;x.fillStyle=color||'#1B1B1B';x.textAlign=align||'left';x.textBaseline='alphabetic';x.fillText(t,px,py);};
+  var wrap=function(t,px,py,maxW,size,color,lh){x.font='400 '+size+'px '+FONT;var words=t.split(' '),line='',n=0;words.forEach(function(w){var test=line?line+' '+w:w;if(x.measureText(test).width>maxW&&line){T(line,px,py+n*lh,size,400,color);n++;line=w;}else line=test;});if(line){T(line,px,py+n*lh,size,400,color);n++;}return n*lh;};
+  var rr=function(px,py,w,h,r,fill,stroke){x.beginPath();x.moveTo(px+r,py);x.arcTo(px+w,py,px+w,py+h,r);x.arcTo(px+w,py+h,px,py+h,r);x.arcTo(px,py+h,px,py,r);x.arcTo(px,py,px+w,py,r);x.closePath();if(fill){x.fillStyle=fill;x.fill();}if(stroke){x.strokeStyle=stroke;x.lineWidth=1;x.stroke();}};
+  var rowH=40,headH=56,tableH=headH+7*rowH,cardH=600,H=170+40+tableH+28+cardH+70,S=2;
+  cv.width=W*S;cv.height=H*S;x.scale(S,S);
+  x.fillStyle='#FAFAF9';x.fillRect(0,0,W,H);x.fillStyle='#45011A';x.fillRect(0,0,W,170);
+  T('EMIRATES NBD SHARE VISA CREDIT CARD',P,52,13,500,'#D8A7B1');T('THE MILLION DIRHAM SPIN',P,112,46,300,'#FFFFFF');
+  T('Daily snapshot',W-P,52,13,400,'rgba(255,255,255,.65)','right');T('As of '+dDow(last)+' '+dShort(last)+' '+last.slice(0,4),W-P,78,17,600,'#FFFFFF','right');
+  T('Three malls: Mall of the Emirates, City Centre Mirdif, City Centre Deira',P,146,14,400,'rgba(255,255,255,.75)');
+  /* table */
+  var ty=210,tw=W-2*P,c0=250,cw=(tw-c0)/(show.length+1);
+  rr(P,ty,tw,tableH,12,'#FFFFFF','#E6E2E0');x.save();rr(P,ty,tw,tableH,12);x.clip();
+  x.fillStyle='#F3F1F0';x.fillRect(P,ty,tw,headH);x.fillStyle='#45011A';x.fillRect(P,ty,c0,headH);
+  x.fillStyle='#F6E9EC';x.fillRect(P+c0+(show.length-1)*cw,ty,cw,tableH);
+  T(show.length<days.length?'OVERALL · LAST '+show.length+' DAYS':'OVERALL',P+18,ty+34,13,500,'#FFFFFF');
+  show.forEach(function(d,i){var cx=P+c0+i*cw+cw/2;T(dShort(d),cx,ty+27,13,600,i===show.length-1?'#45011A':'#1B1B1B','center');T(dDow(d),cx,ty+45,12,400,'#77706E','center');});
+  T('Total',P+c0+show.length*cw+cw/2,ty+34,13,600,'#1B1B1B','center');
+  var a=R.apply/100,c=R.conv/100,cnt=function(g){var ch=g.filter(function(r){return r.ch;}).length;return {t:g.length,c:ch,n:g.length-ch};},per=show.map(function(d){return cnt(ALL.filter(function(r){return r.date===d;}));}),tt=cnt(ALL);
+  [['Total',function(o){return f0(o.t);}],['Card Holder',function(o){return f0(o.c);}],['%',function(o){return pct(o.c,o.t)+'%';},1],['Non Card Holder',function(o){return f0(o.n);}],['%',function(o){return pct(o.n,o.t)+'%';},1],['Est. applications ('+R.apply+'%)',function(o){return f0(o.n*a);},2],['Est. new cards ('+R.conv+'%)',function(o){return f1(o.n*a*c);},2]].forEach(function(L,i){
+    var y=ty+headH+i*rowH;if(L[2]===2){x.fillStyle='rgba(216,167,177,.10)';x.fillRect(P,y,tw,rowH);}
+    x.strokeStyle='#E6E2E0';x.lineWidth=1;x.beginPath();x.moveTo(P,y+.5);x.lineTo(P+tw,y+.5);x.stroke();
+    var col=L[2]===1?'#77706E':L[2]===2?'#45011A':'#1B1B1B',sz=L[2]===1?13:14.5;
+    T(L[0],P+18,y+26,sz,L[2]===1?400:500,col);per.forEach(function(o,j){T(L[1](o),P+c0+j*cw+cw/2,y+26,sz,400,L[2]===1?'#77706E':'#1B1B1B','center');});
+    T(L[1](tt),P+c0+show.length*cw+cw/2,y+26,sz,600,L[2]===1?'#77706E':'#1B1B1B','center');});
+  x.restore();x.strokeStyle='#E6E2E0';x.beginPath();x.moveTo(P+c0+.5,ty);x.lineTo(P+c0+.5,ty+tableH);x.moveTo(P+c0+show.length*cw+.5,ty);x.lineTo(P+c0+show.length*cw+.5,ty+tableH);x.stroke();
+  /* tracking cards */
+  var cy=ty+tableH+28,gap=20,cwid=(tw-gap)/2;
+  cards.forEach(function(k,i){
+    var cx=P+i*(cwid+gap),ix=cx+26,iw=cwid-52,y=cy+40;rr(cx,cy,cwid,cardH,12,'#FFFFFF','#E6E2E0');
+    T(k.title,ix,y,18,500);y+=10;y+=wrap(k.cap,ix,y+16,iw,13,'#77706E',18)+16;
+    y+=50;T(k.big,ix,y,48,400);x.font='400 48px '+FONT;var bw=x.measureText(k.big).width;T(k.unit,ix+bw+10,y,15,400,'#77706E');
+    y+=34;x.font='500 14px '+FONT;var chw=x.measureText(k.chip).width+18,bad=k.chipCls==='down',good=k.chipCls==='up';rr(ix,y-18,chw,26,7,bad?'#FBE6EA':good?'#E4F2EA':'#ECE9E7');T(k.chip,ix+9,y,14,500,bad?'#C2273D':good?'#1F8A5B':'#5F5957');T(k.chipText,ix+chw+10,y,14,400,'#77706E');
+    y+=46;var b=k.bar,m=Math.max(b.target,b.end)||1;T('Target '+f0(b.target),ix+iw*Math.min(b.target/m,1),y-10,12,400,'#77706E','right');
+    rr(ix,y,iw,14,7,'#F3F1F0');if(b.end>0)rr(ix,y,Math.max(iw*Math.min(b.end/m,1),14),14,7,'#D8A7B1');if(b.now>0)rr(ix,y,Math.max(iw*Math.min(b.now/m,1),14),14,7,'#45011A');
+    if(b.mark){var mx=ix+iw*b.mark/m;x.fillStyle='#A68048';x.fillRect(mx-1,y-3,2,20);T(b.markL+' '+f0(b.mark),mx,y+34,12,400,'#77706E','center');}
+    y+=b.mark?52:36;
+    k.rows.forEach(function(r){y+=34;T(r[0],ix+(r[2]?16:0),y-11,14,400,'#77706E');T(r[1],ix+iw,y-11,14,500,'#1B1B1B','right');x.strokeStyle='#ECE9E7';x.beginPath();x.moveTo(ix,y+.5);x.lineTo(ix+iw,y+.5);x.stroke();});
+    wrap(k.foot,ix,y+30,iw,13,'#77706E',19);});
+  T('Cards and cost are estimates from the Emirates NBD play sheet, not reported applications. Generated '+new Date().toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit',timeZone:'Asia/Dubai'})+' Dubai time.',P,H-30,12.5,400,'#77706E');
+  return {canvas:cv,name:'Million-Dirham-Spin-snapshot-'+last+'.png'};
+}
+function downloadSnap(btn){
+  var go=function(){var o=snapPNG();o.canvas.toBlob(function(b){var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=o.name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},4000);if(btn){btn.textContent='Downloaded';setTimeout(function(){btn.textContent='Download PNG';},2000);}},'image/png');};
+  (document.fonts&&document.fonts.ready?document.fonts.ready:Promise.resolve()).then(go,go);
 }
 
 /* ───────── charts ───────── */
@@ -377,7 +437,7 @@ function render(){
 
   if(F.tab==='snap'){
     var allRows=ALL,sd=days;days=allDays;
-    html+=sec('Snapshot','Where we are, as of '+dShort(allDays[allDays.length-1]))+block('Overall',allRows,null)+trackHtml();
+    html+='<div class="sec-t"><span>Snapshot</span><h2>Where we are, as of '+dShort(allDays[allDays.length-1])+'</h2><button type="button" id="snap-dl" class="dl-btn">Download PNG</button></div>'+block('Overall',allRows,null)+trackHtml();
     days=sd;
   }
 
@@ -456,6 +516,7 @@ function render(){
     document.getElementById('f-apply').oninput=setF;document.getElementById('f-conv').oninput=setF;
     fillF();
   }
+  if(F.tab==='snap'){var sb=document.getElementById('snap-dl');if(sb)sb.onclick=function(){downloadSnap(sb);};}
   if(F.tab==='calc'){
     var fill=function(){
       var a=R.apply/100,c=R.conv/100,n=T.nch,ap=n*a,cd=ap*c;
