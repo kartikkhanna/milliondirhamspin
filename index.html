@@ -134,6 +134,28 @@ tr.total td{font-weight:500;border-bottom:0;background:var(--bg)}
 .tile b{display:block;font-size:26px;font-weight:400;margin:6px 0 2px;letter-spacing:-.01em}
 .tile small{font-size:12.5px;color:var(--muted)}
 .msg{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:44px;text-align:center;color:var(--muted)}
+/* daily report + calculator */
+.rep{border-collapse:separate;border-spacing:0;font-size:13px;width:100%}
+.rep th,.rep td{padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--line);min-width:64px}
+.rep th{position:static;font-size:11.5px;letter-spacing:.02em;text-transform:none;color:var(--fg);font-weight:600;background:var(--soft)}
+.rep th:first-child,.rep td:first-child{position:sticky;left:0;z-index:2;text-align:left;min-width:150px;white-space:nowrap;background:var(--panel);font-weight:500;border-right:1px solid var(--line)}
+.rep th:first-child{background:var(--burgundy);color:#fff;letter-spacing:.08em;text-transform:uppercase;border-radius:6px 0 0 0}
+.rep tr.p td{color:var(--muted);font-size:12px}
+.rep tr.e td{background:#FCF7F8}
+.rep tr.e td:first-child{background:#FCF7F8;color:var(--burgundy)}
+.rep .now{background:var(--blush-2)!important}
+.rep th.now{color:var(--burgundy)}
+.rep .tot{font-weight:600;border-left:1px solid var(--line)}
+.rep .na{color:#C9C4C2}
+.rep tbody tr:hover td{background:var(--bg)}
+.calc{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:14px}
+@media (max-width:860px){.calc{grid-template-columns:minmax(0,1fr)}}
+.sl{margin-bottom:22px}
+.sl-h{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px;font-size:14.5px}
+.sl-h b{font-size:26px;font-weight:400}
+.sl small{display:block;color:var(--muted);font-size:12.5px;margin-top:6px}
+input[type=range]{width:100%;accent-color:var(--burgundy);height:28px;margin:0}
+.fun{display:flex;flex-direction:column;gap:12px}
 footer{color:var(--muted);font-size:13px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
 </style>
 </head>
@@ -192,9 +214,12 @@ function tipFor(box){var t=h('<div class="tip" hidden></div>');box.appendChild(t
 
 /* ───────── state ───────── */
 var ALL=[],META={},F={tab:'pulse',loc:'ALL',aud:'ALL',per:'ALL'};
+var R={apply:40,conv:18}; /* % of non-cardholders who apply, and % of applications that convert */
+try{var _r=JSON.parse(localStorage.getItem('mds-rates')||'null');if(_r&&_r.apply>=0&&_r.conv>=0)R=_r;}catch(e){}
+var f1=function(n){return (Math.round(n*10)/10).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});};
 function seg(id,key,opts){var box=document.getElementById(id);box.replaceChildren();opts.forEach(function(o){var b=h('<button type="button" aria-pressed="'+(F[key]===o[0])+'">'+esc(o[1])+'</button>');b.onclick=function(){F[key]=o[0];filters();render();};box.appendChild(b);});}
 function filters(){
-  var tb=document.getElementById('tabs');tb.replaceChildren();[['pulse','Pulse'],['locations','Locations'],['prizes','Prizes'],['cost','Cost']].forEach(function(o){var b=h('<button type="button" aria-pressed="'+(F.tab===o[0])+'">'+o[1]+'</button>');b.onclick=function(){F.tab=o[0];filters();render();window.scrollTo({top:0});};tb.appendChild(b);});
+  var tb=document.getElementById('tabs');tb.replaceChildren();[['pulse','Pulse'],['report','Daily report'],['locations','Locations'],['prizes','Prizes'],['calc','Calculator'],['cost','Cost']].forEach(function(o){var b=h('<button type="button" aria-pressed="'+(F.tab===o[0])+'">'+o[1]+'</button>');b.onclick=function(){F.tab=o[0];filters();render();window.scrollTo({top:0});};tb.appendChild(b);});
   seg('f-loc','loc',[['ALL','All']].concat(LOCS.map(function(l){return [l.code,l.short];})));
   seg('f-aud','aud',[['ALL','All'],['CH','Cardholders'],['NCH','Non-cardholders']]);
   seg('f-per','per',[['ALL','All time'],['7','Last 7 days'],['1','Latest day']]);
@@ -290,19 +315,60 @@ function render(){
       pr.map(function(x){var o=x[1];return '<tr><td>'+esc(x[0])+(o.cat===3?'<span class="tag">Big ticket</span>':'')+'</td><td class="num"><span class="ib" style="width:'+Math.max(4,70*o.won/pmax)+'px"></span>'+f0(o.won)+'</td><td class="num">'+f0(o.ch)+'</td><td class="num">'+f0(o.won-o.ch)+'</td><td class="num">'+(o.val?'AED '+f0(o.val):'–')+'</td></tr>';}).join('')+'</tbody></table></div></div>';
   }
 
+  if(F.tab==='report'){
+    var block=function(title,g,first){
+      var hd='<tr><th>'+title+'</th>'+days.map(function(d,i){return '<th class="'+(i===days.length-1?'now':'')+'">'+dShort(d)+'<br><span style="font-weight:400;color:var(--muted)">'+dDow(d)+'</span></th>';}).join('')+'<th class="tot">Total</th></tr>';
+      var per=days.map(function(d){if(first&&d<first)return null;var x=g.filter(function(r){return r.date===d;});var c=x.filter(function(r){return r.ch;}).length;return {t:x.length,c:c,n:x.length-c};});
+      var tt={t:g.length,c:g.filter(function(r){return r.ch;}).length};tt.n=tt.t-tt.c;
+      var line=function(cls,label,fn){return '<tr class="'+cls+'"><td>'+label+'</td>'+per.map(function(o,i){return '<td class="num '+(i===days.length-1?'now':'')+(o?'':' na')+'">'+(o?fn(o):'–')+'</td>';}).join('')+'<td class="num tot">'+fn(tt)+'</td></tr>';};
+      return '<div class="card" style="padding:0;overflow:hidden"><div class="scroll" style="margin:0;max-height:none"><table class="rep"><thead>'+hd+'</thead><tbody>'+
+        line('','Total',function(o){return f0(o.t);})+
+        line('','Card Holder',function(o){return f0(o.c);})+line('p','%',function(o){return pct(o.c,o.t)+'%';})+
+        line('','Non Card Holder',function(o){return f0(o.n);})+line('p','%',function(o){return pct(o.n,o.t)+'%';})+
+        line('e','Est. applications ('+R.apply+'%)',function(o){return f0(o.n*R.apply/100);})+
+        line('e','Est. new cards ('+R.conv+'%)',function(o){return f1(o.n*R.apply*R.conv/1e4);})+
+        '</tbody></table></div></div>';};
+    html+=sec('Daily report','Performance by day')+'<p style="margin:-8px 0 0;color:var(--muted);font-size:13.5px;line-height:1.55">Applications and new cards are estimates, not reported figures: '+R.apply+'% of non-cardholders apply and '+R.conv+'% of those applications convert. Change the rates in the Calculator tab.</p>';
+    if(F.loc==='ALL')html+=block('Overall',rows,null);
+    shown.forEach(function(l){var g=rows.filter(function(r){return r.loc===l.code;});var fd=ALL.filter(function(r){return r.loc===l.code;}).reduce(function(m,r){return r.date<m?r.date:m;},'9999');html+=block(esc(l.short==='MOE'?'MOE':l.name),g,fd);});
+  }
+
+  if(F.tab==='calc'){
+    html+=sec('Calculator','Apply and conversion')+'<section class="calc"><div class="card"><h3>Assumptions</h3><p class="cap">Move the sliders. The Daily report and the expected rewards cost use the same rates, and your browser remembers them.</p>'+
+      '<div class="sl"><div class="sl-h"><span>Non-cardholders who apply</span><b class="num" id="o-apply"></b></div><input type="range" id="r-apply" min="0" max="100" step="1" value="'+R.apply+'" aria-label="Share of non-cardholders who apply"><small>Share of non-cardholder players who go on to apply for the card</small></div>'+
+      '<div class="sl"><div class="sl-h"><span>Applications that convert</span><b class="num" id="o-conv"></b></div><input type="range" id="r-conv" min="0" max="100" step="1" value="'+R.conv+'" aria-label="Share of applications that convert"><small>Share of those applications that are approved and become new cards</small></div>'+
+      '<button type="button" id="r-reset" style="all:unset;cursor:pointer;font-size:13px;color:var(--rose);border:1.5px solid var(--blush);border-radius:999px;padding:5px 14px">Reset to 40% and 18%</button></div>'+
+      '<div class="card" id="calc-out"></div></section><div class="card" id="calc-tab" style="padding:0;overflow:hidden"></div>';
+  }
+
   if(F.tab==='cost'){
-    var chV=sum(rows,function(r){return r.ch?r.value:0;}),nV=sum(rows,function(r){return r.ch?0:r.value;}),ex=Math.round(chV+nV*APPROVE_EXPECTED),mx=Math.round(chV+nV*APPROVE_MAX);
+    var chV=sum(rows,function(r){return r.ch?r.value:0;}),nV=sum(rows,function(r){return r.ch?0:r.value;}),ex=Math.round(chV+nV*R.apply*R.conv/1e4),mx=Math.round(chV+nV*APPROVE_MAX);
     var planT=sum(shown,function(l){return l.planTotal;}),bT=sum(BUDGET,function(b){return b[1];}),bS=sum(BUDGET,function(b){return b[2];}),bE=sum(BUDGET,function(b){return b[3];});
     var scale=Math.max(REWARDS_TARGET*0.05,mx*1.6),pe=100*ex/scale,pm=100*mx/scale;
     html+=sec('Rewards cost','Tracking against the business case')+'<section class="g11"><div class="card kpi big"><p class="kpi-l">Expected rewards cost</p><div class="kpi-v num">'+f0(ex)+'<small>AED</small></div><p class="kpi-n"><span class="delta">'+(Math.round(1000*ex/REWARDS_TARGET)/10)+'%</span> of the AED '+f0(REWARDS_TARGET)+' rewards target</p>'+
       '<div class="target"><i class="mx" style="width:'+pm+'%"></i><i class="ex" style="width:'+pe+'%"></i><span style="left:'+pe+'%">Expected '+f0(ex)+'</span><span class="b" style="left:'+pm+'%">Maximum '+f0(mx)+'</span></div>'+
-      '<p class="kpi-d" style="line-height:1.55">Prizes valued at business case prices. Non-cardholder prizes are only paid once the card is approved and activated. Bonus tickets carry no cost here.</p></div>'+
+      '<p class="kpi-d" style="line-height:1.55">Prizes valued at business case prices. Non-cardholder prizes are only paid once the card is approved and activated: expected assumes '+R.apply+'% apply and '+R.conv+'% of those convert (set in the Calculator tab). Bonus tickets carry no cost here.</p></div>'+
       '<div class="tiles"><div class="tile"><p>Cardholder prizes</p><b class="num">'+f0(chV)+'</b><small>AED, counted in full</small></div><div class="tile"><p>Non-cardholder prizes</p><b class="num">'+f0(nV)+'</b><small>AED face value, pending approval</small></div><div class="tile"><p>Maximum rewards cost</p><b class="num">'+f0(mx)+'</b><small>AED, at the 40% approval cap</small></div><div class="tile"><p>Spins vs plan</p><b class="num">'+(Math.round(1000*T.spins/planT)/10)+'%</b><small>of '+f0(planT)+' planned plays</small></div></div></section>';
     html+=sec('Budget','Location and marketing')+'<div class="card"><div class="head"><div><h3>AED '+f0(bT)+' committed</h3><p class="cap">From the business case. Actual spend is not tracked here yet.</p></div><div class="legend"><span><i style="background:'+CH_COL+'"></i>SHARE '+f0(bS)+'</span><span><i style="background:#A68048"></i>Emirates NBD '+f0(bE)+'</span></div></div><div class="rows">'+
       BUDGET.map(function(b){return '<div class="frow"><div class="n">'+esc(b[0])+'</div><div class="track"><div class="stack" style="width:'+(100*b[1]/BUDGET[0][1])+'%"><i style="width:'+(100*b[2]/b[1])+'%;background:'+CH_COL+'"></i><i style="flex:1;background:#A68048"></i></div></div><div class="v num"><b>'+f0(b[1])+'</b></div></div>';}).join('')+'</div></div>';
   }
 
   app.replaceChildren(h('<div style="display:flex;flex-direction:column;gap:20px">'+html+'</div>'));
+  if(F.tab==='calc'){
+    var fill=function(){
+      var a=R.apply/100,c=R.conv/100,n=T.nch,ap=n*a,cd=ap*c;
+      document.getElementById('o-apply').textContent=R.apply+'%';document.getElementById('o-conv').textContent=R.conv+'%';
+      var fr=function(name,sub,val,w,col,right){return '<div class="frow"><div class="n">'+name+'<small>'+sub+'</small></div><div class="track"><div class="stack" style="width:'+w+'%"><i style="flex:1;background:'+col+'"></i></div></div><div class="v num"><b>'+val+'</b>'+right+'</div></div>';};
+      document.getElementById('calc-out').innerHTML='<h3>Estimated funnel</h3><p class="cap">From the non-cardholders in the current filters</p><div class="kpi-v num" style="font-size:52px">'+f0(cd)+'<small>estimated new cards</small></div><p class="kpi-n" style="margin-bottom:22px"><span class="delta">'+f1(100*a*c)+'%</span> of non-cardholder players end up with a card</p><div class="fun">'+
+        fr('Non-cardholders','played, no card yet',f0(n),100,'#D8A7B1','')+fr('Applications','apply for the card',f0(ap),100*a,'#A68048',R.apply+'%')+fr('New cards','approved and activated',f0(cd),100*a*c,'#45011A',R.conv+'%')+'</div>';
+      var body=shown.map(function(l){var g=rows.filter(function(r){return r.loc===l.code;}),x=tot(g);return '<tr><td>'+esc(l.name)+'</td><td class="num">'+f0(x.spins)+'</td><td class="num">'+f0(x.ch)+'</td><td class="num">'+f0(x.nch)+'</td><td class="num">'+f0(x.nch*a)+'</td><td class="num">'+f1(x.nch*a*c)+'</td></tr>';}).join('');
+      document.getElementById('calc-tab').innerHTML='<div class="scroll" style="margin:0"><table><thead><tr><th>Location</th><th>Spins</th><th>Cardholders</th><th>Non-cardholders</th><th>Est. applications</th><th>Est. new cards</th></tr></thead><tbody>'+body+(shown.length>1?'<tr class="total"><td>Total</td><td class="num">'+f0(T.spins)+'</td><td class="num">'+f0(T.ch)+'</td><td class="num">'+f0(n)+'</td><td class="num">'+f0(ap)+'</td><td class="num">'+f1(cd)+'</td></tr>':'')+'</tbody></table></div>';
+    };
+    var set=function(){R.apply=+document.getElementById('r-apply').value;R.conv=+document.getElementById('r-conv').value;try{localStorage.setItem('mds-rates',JSON.stringify(R));}catch(e){}fill();};
+    document.getElementById('r-apply').oninput=set;document.getElementById('r-conv').oninput=set;
+    document.getElementById('r-reset').onclick=function(){document.getElementById('r-apply').value=40;document.getElementById('r-conv').value=18;set();};
+    fill();
+  }
   var box=document.getElementById('c-daily');if(box)drawDaily(box,rows);
   window.onresize=function(){clearTimeout(window.__rz);window.__rz=setTimeout(function(){var b=document.getElementById('c-daily');if(b)drawDaily(b,view());},150);};
 
