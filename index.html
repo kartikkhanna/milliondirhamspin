@@ -214,12 +214,14 @@ function tipFor(box){var t=h('<div class="tip" hidden></div>');box.appendChild(t
 
 /* ───────── state ───────── */
 var ALL=[],META={},F={tab:'pulse',loc:'ALL',aud:'ALL',per:'ALL'};
+var END={MOE:'2026-12-04',MCC:'2026-12-04',DCC:'2026-12-16'}; /* last day of each booth */
+var FB='all'; /* run-rate basis: all days or last 3 */
 var R={apply:40,conv:18}; /* % of non-cardholders who apply, and % of applications that convert */
 try{var _r=JSON.parse(localStorage.getItem('mds-rates')||'null');if(_r&&_r.apply>=0&&_r.conv>=0)R=_r;}catch(e){}
 var f1=function(n){return (Math.round(n*10)/10).toLocaleString('en-US',{minimumFractionDigits:1,maximumFractionDigits:1});};
 function seg(id,key,opts){var box=document.getElementById(id);box.replaceChildren();opts.forEach(function(o){var b=h('<button type="button" aria-pressed="'+(F[key]===o[0])+'">'+esc(o[1])+'</button>');b.onclick=function(){F[key]=o[0];filters();render();};box.appendChild(b);});}
 function filters(){
-  var tb=document.getElementById('tabs');tb.replaceChildren();[['pulse','Pulse'],['report','Daily report'],['locations','Locations'],['prizes','Prizes'],['calc','Calculator'],['cost','Cost']].forEach(function(o){var b=h('<button type="button" aria-pressed="'+(F.tab===o[0])+'">'+o[1]+'</button>');b.onclick=function(){F.tab=o[0];filters();render();window.scrollTo({top:0});};tb.appendChild(b);});
+  var tb=document.getElementById('tabs');tb.replaceChildren();[['pulse','Pulse'],['report','Daily report'],['locations','Locations'],['prizes','Prizes'],['forecast','Forecast'],['calc','Calculator'],['cost','Cost']].forEach(function(o){var b=h('<button type="button" aria-pressed="'+(F.tab===o[0])+'">'+o[1]+'</button>');b.onclick=function(){F.tab=o[0];filters();render();window.scrollTo({top:0});};tb.appendChild(b);});
   seg('f-loc','loc',[['ALL','All']].concat(LOCS.map(function(l){return [l.code,l.short];})));
   seg('f-aud','aud',[['ALL','All'],['CH','Cardholders'],['NCH','Non-cardholders']]);
   seg('f-per','per',[['ALL','All time'],['7','Last 7 days'],['1','Latest day']]);
@@ -333,6 +335,16 @@ function render(){
     shown.forEach(function(l){var g=rows.filter(function(r){return r.loc===l.code;});var fd=ALL.filter(function(r){return r.loc===l.code;}).reduce(function(m,r){return r.date<m?r.date:m;},'9999');html+=block(esc(l.short==='MOE'?'MOE':l.name),g,fd);});
   }
 
+  if(F.tab==='forecast'){
+    html+=sec('Forecast','Where the current run-rate takes us')+'<section class="calc"><div class="card"><h3>Assumptions</h3><p class="cap">Projects each booth from its average spins per day to its last day. Uses all days to date, whatever the period filter says.</p>'+
+      '<div class="sl"><div class="sl-h"><span>Non-cardholders who apply</span><b class="num" id="fo-apply"></b></div><input type="range" id="f-apply" min="0" max="100" step="1" value="'+R.apply+'" aria-label="Share of non-cardholders who apply"></div>'+
+      '<div class="sl"><div class="sl-h"><span>Applications approved</span><b class="num" id="fo-conv"></b></div><input type="range" id="f-conv" min="0" max="100" step="1" value="'+R.conv+'" aria-label="Share of applications approved"></div>'+
+      '<div class="fg" style="margin-bottom:6px"><label>Run-rate from</label><div class="seg" id="f-basis"></div></div></div>'+
+      '<div class="card" id="fc-out"></div></section>'+
+      '<div class="card"><div class="head"><div><h3>Spins: actual and projected</h3><p class="cap">Cumulative spins across the booths in view</p></div><div class="legend"><span><i style="background:#45011A"></i>Actual</span><span><i style="background:#D8A7B1"></i>Projected</span><span><i style="background:#A68048"></i>Plan</span></div></div><div class="chart" id="fc-chart"></div></div>'+
+      '<div class="card" id="fc-tab" style="padding:0;overflow:hidden"></div>';
+  }
+
   if(F.tab==='calc'){
     html+=sec('Calculator','Apply and conversion')+'<section class="calc"><div class="card"><h3>Assumptions</h3><p class="cap">Move the sliders. The Daily report and the expected rewards cost use the same rates, and your browser remembers them.</p>'+
       '<div class="sl"><div class="sl-h"><span>Non-cardholders who apply</span><b class="num" id="o-apply"></b></div><input type="range" id="r-apply" min="0" max="100" step="1" value="'+R.apply+'" aria-label="Share of non-cardholders who apply"><small>Share of non-cardholder players who go on to apply for the card</small></div>'+
@@ -354,6 +366,50 @@ function render(){
   }
 
   app.replaceChildren(h('<div style="display:flex;flex-direction:column;gap:20px">'+html+'</div>'));
+  if(F.tab==='forecast'){
+    var dnum=function(d){var p=d.split('-');return Date.UTC(+p[0],+p[1]-1,+p[2])/864e5;},dstr=function(n){return new Date(n*864e5).toISOString().slice(0,10);};
+    var lastD=allDays[allDays.length-1],base=ALL.filter(function(r){return F.loc==='ALL'||r.loc===F.loc;});
+    var fillF=function(){
+      var a=R.apply/100,c=R.conv/100;
+      document.getElementById('fo-apply').textContent=R.apply+'%';document.getElementById('fo-conv').textContent=R.conv+'%';
+      var bs=document.getElementById('f-basis');bs.replaceChildren();[['all','All days'],['3','Last 3 days']].forEach(function(o){var b=h('<button type="button" aria-pressed="'+(FB===o[0])+'">'+o[1]+'</button>');b.onclick=function(){FB=o[0];fillF();};bs.appendChild(b);});
+      var L=shown.map(function(l){
+        var g=base.filter(function(r){return r.loc===l.code;}),ds=Array.from(new Set(g.map(function(r){return r.date;}))).sort(),use=FB==='3'?ds.slice(-3):ds,us=new Set(use);
+        var rate=use.length?g.filter(function(r){return us.has(r.date);}).length/use.length:0,left=Math.max(0,dnum(END[l.code])-dnum(lastD));
+        var x=tot(g),nshare=x.spins?x.nch/x.spins:0,add=rate*left,fs=x.spins+add,fn=x.nch+add*nshare,fch=fs-fn;
+        var chAvg=x.ch?sum(g,function(r){return r.ch?r.value:0;})/x.ch:0,nAvg=x.nch?sum(g,function(r){return r.ch?0:r.value;})/x.nch:0;
+        return {l:l,rate:rate,left:left,x:x,fs:fs,fn:fn,ap:fn*a,cd:fn*a*c,cost:fch*chAvg+fn*a*c*nAvg,add:add};});
+      var S2=function(k){return sum(L,function(o){return o[k];});},fs=S2('fs'),fn=S2('fn'),ap=S2('ap'),cd=S2('cd'),cost=S2('cost'),planT=sum(shown,function(l){return l.planTotal;}),bT=sum(BUDGET,function(b){return b[1];});
+      var tile=function(t,v,sub){return '<div class="tile"><p>'+t+'</p><b class="num">'+v+'</b><small>'+sub+'</small></div>';};
+      document.getElementById('fc-out').innerHTML='<h3>By the end of the activation</h3><p class="cap">If the booths keep their current pace</p><div class="kpi-v num" style="font-size:52px">'+f0(cd)+'<small>new cards expected</small></div><p class="kpi-n" style="margin-bottom:18px"><span class="delta">'+f0(ap)+'</span> applications from '+f0(fn)+' non-cardholders</p><div class="tiles">'+
+        tile('Forecast spins',f0(fs),pct(fs,planT)+'% of '+f0(planT)+' planned')+tile('Rewards cost',f0(cost),'AED, '+(Math.round(1000*cost/REWARDS_TARGET)/10)+'% of the AED '+f0(REWARDS_TARGET)+' target')+
+        tile('Rewards cost per new card',cd>=0.5?f0(cost/cd):'–','AED')+(F.loc==='ALL'?tile('All-in cost per new card',cd>=0.5?f0((cost+bT)/cd):'–','AED, incl. AED '+f0(bT)+' location and marketing'):tile('Applications',f0(ap),R.apply+'% of non-cardholders'))+'</div>';
+      document.getElementById('fc-tab').innerHTML='<div class="scroll" style="margin:0"><table><thead><tr><th>Location</th><th>Last day</th><th>Days left</th><th>Spins / day</th><th>Spins so far</th><th>Forecast spins</th><th>vs plan</th><th>Non-cardholders</th><th>Applications</th><th>New cards</th><th>Rewards cost (AED)</th></tr></thead><tbody>'+
+        L.map(function(o){return '<tr><td>'+esc(o.l.name)+'</td><td>'+dShort(END[o.l.code])+'</td><td class="num">'+f0(o.left)+'</td><td class="num">'+f0(o.rate)+'</td><td class="num">'+f0(o.x.spins)+'</td><td class="num">'+f0(o.fs)+'</td><td class="num">'+pct(o.fs,o.l.planTotal)+'%</td><td class="num">'+f0(o.fn)+'</td><td class="num">'+f0(o.ap)+'</td><td class="num">'+f0(o.cd)+'</td><td class="num">'+f0(o.cost)+'</td></tr>';}).join('')+
+        (L.length>1?'<tr class="total"><td>Total</td><td></td><td></td><td class="num">'+f0(S2('rate'))+'</td><td class="num">'+f0(sum(L,function(o){return o.x.spins;}))+'</td><td class="num">'+f0(fs)+'</td><td class="num">'+pct(fs,planT)+'%</td><td class="num">'+f0(fn)+'</td><td class="num">'+f0(ap)+'</td><td class="num">'+f0(cd)+'</td><td class="num">'+f0(cost)+'</td></tr>':'')+'</tbody></table></div>';
+      /* cumulative chart */
+      var box=document.getElementById('fc-chart');box.replaceChildren();
+      var d0=dnum(allDays[0]),dL=dnum(lastD),dE=Math.max.apply(null,L.map(function(o){return dnum(END[o.l.code]);})),pts=[],cum=0;
+      for(var d=d0;d<=dE;d++){var ds=dstr(d);if(d<=dL){cum+=base.filter(function(r){return r.date===ds;}).length;}else{cum+=sum(L,function(o){return d<=dnum(END[o.l.code])?o.rate:0;});}pts.push([d,cum]);}
+      var W=Math.max(box.clientWidth||700,280),H=260,m={t:16,r:14,b:30,l:48},raw=Math.max(cum,planT)*1.08||1,p10=Math.pow(10,Math.floor(Math.log10(raw/4))),stp=[1,2,2.5,5,10].map(function(k){return k*p10;}).filter(function(k){return k*4>=raw;})[0]||10*p10,top=stp*4,X=function(d){return m.l+(W-m.l-m.r)*(d-d0)/Math.max(dE-d0,1);},Y=function(v){return H-m.b-(H-m.b-m.t)*v/top;};
+      var sv=S('svg',{viewBox:'0 0 '+W+' '+H,role:'img','aria-label':'Cumulative spins, actual and projected'});
+      for(var i=0;i<=4;i++){var v=top*i/4;sv.appendChild(S('line',{x1:m.l,x2:W-m.r,y1:Y(v),y2:Y(v),stroke:i?'#F0E9E6':'#D9CBC7','stroke-dasharray':i?'3 4':''}));sv.appendChild(S('text',{x:m.l-8,y:Y(v)+4,'text-anchor':'end'},fk(v)));}
+      var path=function(a){return a.map(function(p,i){return (i?'L':'M')+X(p[0]).toFixed(1)+' '+Y(p[1]).toFixed(1);}).join(' ');};
+      var act=pts.filter(function(p){return p[0]<=dL;}),prj=pts.filter(function(p){return p[0]>=dL;});
+      sv.appendChild(S('line',{x1:m.l,x2:W-m.r,y1:Y(planT),y2:Y(planT),stroke:'#A68048','stroke-dasharray':'6 5','stroke-width':1.5}));
+      sv.appendChild(S('text',{x:W-m.r,y:Y(planT)-6,'text-anchor':'end'},'Plan '+f0(planT)));
+      sv.appendChild(S('path',{d:path(prj),fill:'none',stroke:'#D8A7B1','stroke-width':3,'stroke-dasharray':'2 6','stroke-linecap':'round'}));
+      sv.appendChild(S('path',{d:path(act),fill:'none',stroke:'#45011A','stroke-width':3,'stroke-linecap':'round','stroke-linejoin':'round'}));
+      sv.appendChild(S('circle',{cx:X(dL),cy:Y(act[act.length-1][1]),r:4.5,fill:'#45011A'}));
+      sv.appendChild(S('text',{class:'val',x:X(dL)+8,y:Y(act[act.length-1][1])+16},f0(act[act.length-1][1])+' on '+dShort(lastD)));
+      sv.appendChild(S('text',{class:'val',x:X(dE),y:Y(cum)-10,'text-anchor':'end'},f0(cum)+' by '+dShort(dstr(dE))));
+      [d0,dL,dE].forEach(function(d,i){sv.appendChild(S('text',{x:X(d),y:H-8,'text-anchor':i===0?'start':i===2?'end':'middle'},dShort(dstr(d))));});
+      box.appendChild(sv);
+    };
+    var setF=function(){R.apply=+document.getElementById('f-apply').value;R.conv=+document.getElementById('f-conv').value;try{localStorage.setItem('mds-rates',JSON.stringify(R));}catch(e){}fillF();};
+    document.getElementById('f-apply').oninput=setF;document.getElementById('f-conv').oninput=setF;
+    fillF();
+  }
   if(F.tab==='calc'){
     var fill=function(){
       var a=R.apply/100,c=R.conv/100,n=T.nch,ap=n*a,cd=ap*c;
