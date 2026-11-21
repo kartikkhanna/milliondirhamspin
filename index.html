@@ -24,7 +24,8 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:Outfit,-apple-sys
 .brand{font-size:13px;letter-spacing:.14em;text-transform:uppercase;font-weight:500;color:var(--blush)}
 .refresh{text-align:right;font-size:12.5px;color:rgba(255,255,255,.6);line-height:1.7;white-space:nowrap}
 .refresh b{display:block;color:#fff;font-weight:600;font-size:13.5px}
-h1{font-size:54px;line-height:1.05;font-weight:300;margin:16px 0 26px;letter-spacing:.005em;text-transform:uppercase}
+h1{font-size:54px;line-height:1.05;font-weight:300;margin:16px 0 12px;letter-spacing:.005em;text-transform:uppercase}
+.asof{margin:0 0 22px;font-size:15px;color:rgba(255,255,255,.8);min-height:20px}.asof b{color:#fff;font-weight:600}.locked .asof{visibility:hidden}
 .tabs{display:flex;gap:8px;flex-wrap:wrap}
 .tabs button{all:unset;cursor:pointer;font:500 14.5px Outfit,sans-serif;color:#fff;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:8px 18px;transition:background .15s,border-color .15s}
 .tabs button:hover{border-color:rgba(255,255,255,.6)}
@@ -180,6 +181,7 @@ footer{color:var(--muted);font-size:13px;line-height:1.7;border-top:1px solid va
     <div class="refresh">Last data refresh<b id="pill-t">Locked</b><button type="button" class="lockbtn" id="lockbtn" hidden>Lock</button></div>
   </div>
   <h1>The Million Dirham Spin</h1>
+  <p class="asof" id="asof"></p>
   <div class="tabs" id="tabs"></div>
 </div></div>
 
@@ -541,7 +543,7 @@ function render(){
   if(META.skipped&&META.skipped.length)foot+=' '+META.skipped.length+' sheet row(s) left out because the date, location or prize is missing.';
   document.getElementById('foot').textContent=foot;
 }
-function stamp(){var u=new Date(META.updated);document.getElementById('pill-t').textContent=u.toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Dubai'})+', '+u.toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Dubai'});}
+function stamp(){var u=new Date(META.updated);document.getElementById('pill-t').textContent=u.toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Dubai'})+', '+u.toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Dubai'});var ld=ALL.reduce(function(m,r){return r.date>m?r.date:m;},'');document.getElementById('asof').innerHTML=ld?'Data last updated for <b>'+dDow(ld)+' '+dShort(ld)+' '+ld.slice(0,4)+'</b>':'';}
 /* ───────── unlock + load (all figures are encrypted at rest) ───────── */
 var PRIV=null;
 var ub=function(t){var b=atob(t),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;};
