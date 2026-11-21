@@ -3,7 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow">
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet">
+<meta name="referrer" content="no-referrer">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'none'; form-action 'none'">
 <title>The Million Dirham Spin | Performance Tracker</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -380,7 +382,7 @@ function render(){
 }
 function stamp(){var u=new Date(META.updated);document.getElementById('pill-t').textContent=u.toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Dubai'})+', '+u.toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Dubai'});}
 function load(){
-  fetch('data.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){META=d;ALL=d.rows.map(enrich);stamp();filters();render();}).catch(function(){
+  fetch('data.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){META=d;ALL=d.rows.filter(function(r){return r&&/^\d{4}-\d{2}-\d{2}$/.test(r.d)&&/^(MOE|MCC|DCC)$/.test(r.l)&&typeof r.p==='string'&&r.p.length<120;}).map(enrich);stamp();filters();render();}).catch(function(){
     if(ALL.length)return;document.getElementById('pill-t').textContent='Not loaded';
     document.getElementById('app').replaceChildren(h('<div class="msg">The activation data could not be loaded. Please refresh in a minute.</div>'));});
 }
