@@ -136,6 +136,16 @@ tr.total td{font-weight:500;border-bottom:0;background:var(--bg)}
 .tile b{display:block;font-size:26px;font-weight:400;margin:6px 0 2px;letter-spacing:-.01em}
 .tile small{font-size:12.5px;color:var(--muted)}
 .msg{background:var(--panel);border:1px dashed var(--line);border-radius:12px;padding:44px;text-align:center;color:var(--muted)}
+.lock{max-width:440px;margin:40px auto;text-align:center;padding:34px 30px}
+.lock h3{font-size:22px;font-weight:400;margin:0 0 6px}
+.lock p{color:var(--muted);font-size:14px;line-height:1.55;margin:0 0 20px}
+.lock input{width:100%;font:400 16px Outfit,sans-serif;padding:12px 14px;border:1px solid var(--line);border-radius:10px;text-align:center;letter-spacing:.06em;outline:none}
+.lock input:focus{border-color:var(--burgundy);box-shadow:0 0 0 3px var(--blush-2)}
+.lock button{all:unset;cursor:pointer;display:block;width:100%;box-sizing:border-box;margin-top:12px;background:var(--burgundy);color:#fff;border-radius:999px;padding:12px;font:500 15px Outfit,sans-serif;text-align:center}
+.lock button[disabled]{opacity:.6;cursor:wait}
+.lock .err{color:var(--red);font-size:13.5px;min-height:20px;margin:12px 0 0}
+.locked .bar,.locked .tabs,.locked footer{display:none}
+.lockbtn{all:unset;cursor:pointer;font-size:12.5px;color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:3px 11px;margin-top:6px;display:inline-block}
 /* daily report + calculator */
 .rep{border-collapse:separate;border-spacing:0;font-size:13px;width:100%}
 .rep th,.rep td{padding:8px 10px;text-align:center;white-space:nowrap;border-bottom:1px solid var(--line);min-width:64px}
@@ -161,11 +171,11 @@ input[type=range]{width:100%;accent-color:var(--burgundy);height:28px;margin:0}
 footer{color:var(--muted);font-size:13px;line-height:1.7;border-top:1px solid var(--line);padding-top:16px}
 </style>
 </head>
-<body>
+<body class="locked">
 <div class="hero"><div class="in">
   <div class="top">
     <div class="brand">Emirates NBD SHARE Visa Credit Card</div>
-    <div class="refresh">Last data refresh<b id="pill-t">Loading</b></div>
+    <div class="refresh">Last data refresh<b id="pill-t">Locked</b><button type="button" class="lockbtn" id="lockbtn" hidden>Lock</button></div>
   </div>
   <h1>The Million Dirham Spin</h1>
   <div class="tabs" id="tabs"></div>
@@ -181,18 +191,15 @@ footer{color:var(--muted);font-size:13px;line-height:1.7;border-top:1px solid va
 <footer id="foot"></footer><div style="height:40px"></div></div>
 
 <script>
-/* ───────── Fixed reference figures, from the business case workbook ───────── */
+/* ───────── Reference data ───────── */
 var LOCS=[
-  {code:'MOE',name:'Mall of the Emirates',short:'MOE',color:'#45011A',planPerDay:122,planTotal:2623,firstFullDay:'2026-11-18'},
-  {code:'MCC',name:'City Centre Mirdif',short:'Mirdif',color:'#A68048',planPerDay:122,planTotal:2623,firstFullDay:'2026-11-18'},
-  {code:'DCC',name:'City Centre Deira',short:'Deira',color:'#D8A7B1',planPerDay:280,planTotal:9072,firstFullDay:'2026-11-17'}
+  {code:'MOE',name:'Mall of the Emirates',short:'MOE',color:'#45011A',planPerDay:0,planTotal:0,firstFullDay:'2026-11-18'},
+  {code:'MCC',name:'City Centre Mirdif',short:'Mirdif',color:'#A68048',planPerDay:0,planTotal:0,firstFullDay:'2026-11-18'},
+  {code:'DCC',name:'City Centre Deira',short:'Deira',color:'#D8A7B1',planPerDay:0,planTotal:0,firstFullDay:'2026-11-17'}
 ];
-var PRIZE_VALUE={'Carrefour AED 50 voucher':50,'Carrefour AED 100 voucher':100,'Carrefour AED 150 voucher':150,'Carrefour AED 250 voucher':250,
-  '1,000 SHARE Points':100,'1,500 SHARE Points':150,'2,500 SHARE Points':250,'10,000 SHARE Points':1000,'20,000 SHARE Points':2000,
-  'Anker Soundcore speaker':80,'JBL Soundgear Clips':400,'Dyson V8 Absolute':800,'Samsung 65-inch mini LED 4K Smart TV':2000,
-  '24K gold bar - 5g':2500,'24K gold bar - 10g':5000,'HP Pavilion 15 AI Laptop':3000,'Samsung Z Flip8 256GB':4699,'Samsung Galaxy Z Fold8 Ultra 256GB':7999};
-var BUDGET=[['Booth production, promoters, OOH and radio',1259000,0,1259000],['Carrefour rental and retail media',400000,400000,0],['Deira 6x3m mall rental',225000,112500,112500],['Influencers',110300,110300,0],['WhatsApp',70500,70500,0],['Paid media',54985,54985,0],['Assets and collateral production',21180,21180,0]];
-var REWARDS_TARGET=500000,APPROVE_EXPECTED=0.10,APPROVE_MAX=0.20;
+/* Plan, prize values and budget are not in this file: they arrive encrypted (config.enc.json) and are unlocked with the passphrase. */
+var PRIZE_VALUE={},BUDGET=[];
+var REWARDS_TARGET=0,APPROVE_EXPECTED=0.10,APPROVE_MAX=0.20;
 var CATS=[['Bonus Millionaire tickets','#45011A'],['Carrefour vouchers','#A68048'],['SHARE Points','#D8A7B1'],['Big-ticket prizes','#1E0A10']];
 var CH_COL='#45011A',NCH_COL='#D8A7B1';
 
@@ -381,12 +388,48 @@ function render(){
   document.getElementById('foot').textContent=foot;
 }
 function stamp(){var u=new Date(META.updated);document.getElementById('pill-t').textContent=u.toLocaleString('en-GB',{day:'numeric',month:'short',year:'numeric',timeZone:'Asia/Dubai'})+', '+u.toLocaleString('en-GB',{hour:'2-digit',minute:'2-digit',timeZone:'Asia/Dubai'});}
+/* ───────── unlock + load (all figures are encrypted at rest) ───────── */
+var PRIV=null;
+var ub=function(t){var b=atob(t),a=new Uint8Array(b.length);for(var i=0;i<b.length;i++)a[i]=b.charCodeAt(i);return a;};
+var getJ=function(f){return fetch(f+'?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error('load');return r.json();});};
+function unlock(pass){
+  return getJ('keys.json').then(function(k){
+    return crypto.subtle.importKey('raw',new TextEncoder().encode(pass),'PBKDF2',false,['deriveKey']).then(function(m){
+      return crypto.subtle.deriveKey({name:'PBKDF2',salt:ub(k.kdf.salt),iterations:k.kdf.iter,hash:'SHA-256'},m,{name:'AES-GCM',length:256},false,['decrypt']);
+    }).then(function(key){return crypto.subtle.decrypt({name:'AES-GCM',iv:ub(k.wrapped.iv)},key,ub(k.wrapped.ct));})
+      .then(function(pk8){return crypto.subtle.importKey('pkcs8',pk8,{name:'RSA-OAEP',hash:'SHA-256'},false,['decrypt']);},function(){throw new Error('pass');});
+  });
+}
+function open1(blob){
+  return crypto.subtle.decrypt({name:'RSA-OAEP'},PRIV,ub(blob.k)).then(function(raw){return crypto.subtle.importKey('raw',raw,'AES-GCM',false,['decrypt']);})
+    .then(function(key){return crypto.subtle.decrypt({name:'AES-GCM',iv:ub(blob.iv)},key,ub(blob.ct));}).then(function(buf){return JSON.parse(new TextDecoder().decode(buf));});
+}
 function load(){
-  fetch('data.json?t='+Date.now(),{cache:'no-store'}).then(function(r){if(!r.ok)throw new Error(r.status);return r.json();}).then(function(d){META=d;ALL=d.rows.filter(function(r){return r&&/^\d{4}-\d{2}-\d{2}$/.test(r.d)&&/^(MOE|MCC|DCC)$/.test(r.l)&&typeof r.p==='string'&&r.p.length<120;}).map(enrich);stamp();filters();render();}).catch(function(){
+  if(!PRIV)return Promise.resolve();
+  return getJ('data.enc.json').then(open1).then(function(d){META=d;ALL=d.rows.filter(function(r){return r&&/^\d{4}-\d{2}-\d{2}$/.test(r.d)&&/^(MOE|MCC|DCC)$/.test(r.l)&&typeof r.p==='string'&&r.p.length<120;}).map(enrich);stamp();filters();render();}).catch(function(){
     if(ALL.length)return;document.getElementById('pill-t').textContent='Not loaded';
     document.getElementById('app').replaceChildren(h('<div class="msg">The activation data could not be loaded. Please refresh in a minute.</div>'));});
 }
-load();setInterval(load,10*60*1000);
+function start(pass,quiet){
+  return unlock(pass).then(function(pk){PRIV=pk;return getJ('config.enc.json').then(open1);}).then(function(c){
+    LOCS.forEach(function(l){l.planPerDay=c.plan[l.code][0];l.planTotal=c.plan[l.code][1];});PRIZE_VALUE=c.prizeValue;BUDGET=c.budget;REWARDS_TARGET=c.rewardsTarget;
+    try{sessionStorage.setItem('mds-pass',pass);}catch(e){}
+    document.body.classList.remove('locked');document.getElementById('lockbtn').hidden=false;return load();});
+}
+function lockScreen(msg){
+  PRIV=null;ALL=[];document.body.classList.add('locked');document.getElementById('lockbtn').hidden=true;document.getElementById('pill-t').textContent='Locked';
+  var c=h('<div class="card lock"><h3>This dashboard is protected</h3><p>Enter the passphrase to view the activation figures.</p><input type="password" id="pw" autocomplete="current-password" aria-label="Passphrase" placeholder="Passphrase"><button type="button" id="go">Unlock</button><p class="err" id="pw-err"></p></div>');
+  document.getElementById('app').replaceChildren(c);
+  var inp=document.getElementById('pw'),go=document.getElementById('go'),err=document.getElementById('pw-err');err.textContent=msg||'';
+  var run=function(){var v=inp.value.trim();if(!v)return;go.disabled=true;go.textContent='Unlocking';err.textContent='';
+    start(v).catch(function(e){go.disabled=false;go.textContent='Unlock';err.textContent=e&&e.message==='pass'?'That passphrase is not right.':'Could not load the dashboard. Please try again.';inp.select();});};
+  go.onclick=run;inp.onkeydown=function(ev){if(ev.key==='Enter')run();};inp.focus();
+}
+document.getElementById('lockbtn').onclick=function(){try{sessionStorage.removeItem('mds-pass');}catch(e){}lockScreen();};
+(function(){var saved=null;try{saved=sessionStorage.getItem('mds-pass');}catch(e){}
+  if(!(window.crypto&&crypto.subtle)){document.getElementById('app').replaceChildren(h('<div class="msg">This browser cannot open the protected dashboard. Please use a current version of Chrome, Safari or Edge.</div>'));return;}
+  if(saved){document.getElementById('app').replaceChildren(h('<div class="msg">Unlocking</div>'));start(saved).catch(function(){try{sessionStorage.removeItem('mds-pass');}catch(e){}lockScreen();});}else lockScreen();})();
+setInterval(load,10*60*1000);
 </script>
 </body>
 </html>

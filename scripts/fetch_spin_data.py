@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""The Million Dirham Spin: read the Emirates NBD reporting workbook and write data.json.
+"""The Million Dirham Spin: read the Emirates NBD reporting workbook and write data.enc.json (encrypted).
 
 Runs in GitHub Actions on a schedule (see .github/workflows/spin-data.yml).
 The workbook is shared as "anyone with the link can view", so no login is needed.
@@ -84,28 +84,36 @@ def parse(blob):
 
 
 def main():
+    import hashlib, spincrypt
+    root = os.path.dirname(OUT)
+    enc_path, keys = os.path.join(root, "data.enc.json"), os.path.join(root, "keys.json")
     blob = open(sys.argv[1], "rb").read() if len(sys.argv) > 1 else download()
     rows, skipped = parse(blob)
-    old = []
-    if os.path.exists(OUT):
+    old = {}
+    if os.path.exists(enc_path):
         try:
-            old = json.load(open(OUT)).get("rows", [])
+            old = json.load(open(enc_path))
         except Exception:
             pass
-    if not rows or len(rows) < 0.8 * len(old):
-        sys.exit("ABORT: parsed %d plays but the dashboard holds %d. Left unchanged; check the sheet layout." % (len(rows), len(old)))
-    if rows == old:
+    old_n = int(old.get("n", 0))
+    if not rows or len(rows) < 0.8 * old_n:
+        sys.exit("ABORT: parsed %d plays but the dashboard holds %d. Left unchanged; check the sheet layout." % (len(rows), old_n))
+    digest = hashlib.sha256(json.dumps(rows, sort_keys=True).encode()).hexdigest()
+    if digest == old.get("h"):
         print("No change: %d plays." % len(rows))
         return
-    out = {
-        "updated": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+    updated = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    out = spincrypt.seal({
+        "updated": updated,
         "source": "Emirates NBD reporting sheet (SHARE Spin the Wheel - MAF reporting)",
         "skipped": skipped,
         "rows": rows,
-    }
-    json.dump(out, open(OUT, "w"), ensure_ascii=False, separators=(",", ":"))
-    print("Wrote %d plays (was %d). Skipped rows: %s" % (len(rows), len(old), skipped or "none"))
+    }, keys)
+    out.update(h=digest, n=len(rows), updated=updated)  # h and n let the next run spot changes without the passphrase
+    json.dump(out, open(enc_path, "w"), separators=(",", ":"))
+    print("Wrote %d plays (was %d), encrypted. Skipped rows: %s" % (len(rows), old_n, skipped or "none"))
 
 
 if __name__ == "__main__":
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     main()
