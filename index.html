@@ -40,6 +40,9 @@ h1{font-size:54px;line-height:1.05;font-weight:300;margin:16px 0 12px;letter-spa
 .seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:999px;padding:4px;gap:2px;box-shadow:0 1px 2px rgba(0,0,0,.04);overflow-x:auto}
 .seg button{all:unset;cursor:pointer;font:400 14px Outfit,sans-serif;color:var(--muted);padding:6px 13px;border-radius:999px;white-space:nowrap}
 .seg button:hover{color:var(--fg)}
+.dsel{appearance:none;-webkit-appearance:none;cursor:pointer;font:400 14px Outfit,sans-serif;color:var(--muted);background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%2345011A' stroke-width='1.5' stroke-linecap='round'/%3E%3C/svg%3E") no-repeat right 14px center;border:1px solid var(--line);border-radius:999px;padding:10px 34px 10px 16px;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.dsel[data-on="true"]{background-color:var(--chip);color:var(--fg);font-weight:500;border-color:var(--blush,#D8A7B1)}
+.dsel:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
 .seg button[aria-pressed="true"]{background:var(--chip);color:var(--fg);font-weight:500}
 
 main{padding:34px 0 60px;display:flex;flex-direction:column;gap:20px}
@@ -186,7 +189,7 @@ footer{color:var(--muted);font-size:13px;line-height:1.7;border-top:1px solid va
 </div></div>
 
 <div class="bar"><div class="in"><div>
-  <div class="fg"><div class="seg" id="f-per"></div></div>
+  <div class="fg"><div class="seg" id="f-per"></div><div id="f-date"></div></div>
   <div class="fg"><label>Location</label><div class="seg" id="f-loc"></div></div>
   <div class="fg"><label>Audience</label><div class="seg" id="f-aud"></div></div>
 </div></div></div>
@@ -240,9 +243,14 @@ function filters(){
   seg('f-loc','loc',[['ALL','All']].concat(LOCS.map(function(l){return [l.code,l.short];})));
   seg('f-aud','aud',[['ALL','All'],['CH','Cardholders'],['NCH','Non-cardholders']]);
   seg('f-per','per',[['ALL','All time'],['7','Last 7 days'],['1','Latest day']]);
+  var dbox=document.getElementById('f-date'),dds=Array.from(new Set(ALL.map(function(r){return r.date;}))).sort().reverse(),on=F.per.charAt(0)==='D';
+  dbox.replaceChildren();
+  var sel=h('<select class="dsel" aria-label="Show a specific date" data-on="'+on+'"><option value="">Specific date</option>'+dds.map(function(d){return '<option value="'+d+'"'+(F.per==='D'+d?' selected':'')+'>'+dDow(d)+' '+dShort(d)+' '+d.slice(0,4)+'</option>';}).join('')+'</select>');
+  sel.onchange=function(){F.per=sel.value?'D'+sel.value:'ALL';filters();render();};
+  dbox.appendChild(sel);
 }
 function view(){
-  var days=Array.from(new Set(ALL.map(function(r){return r.date;}))).sort(),keep=F.per==='ALL'?days:days.slice(-(+F.per));
+  var days=Array.from(new Set(ALL.map(function(r){return r.date;}))).sort(),keep=F.per==='ALL'?days:F.per.charAt(0)==='D'?[F.per.slice(1)]:days.slice(-(+F.per));
   var set=new Set(keep);
   return ALL.filter(function(r){return (F.loc==='ALL'||r.loc===F.loc)&&(F.aud==='ALL'||(F.aud==='CH')===r.ch)&&set.has(r.date);});
 }
